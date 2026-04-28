@@ -10,6 +10,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../core/models/user_profile.dart';
 import '../../core/providers/providers.dart';
 import '../../core/theme/app_spacing.dart';
+import '../../core/ui/app_dialogs.dart';
 import '../../core/utils/labels.dart';
 import '../../l10n/app_localizations.dart';
 
@@ -249,33 +250,15 @@ class _MetricsCard extends ConsumerWidget {
     double initial,
   ) async {
     final l10n = AppLocalizations.of(context);
-    final ctrl = TextEditingController(
-      text: initial == 0 ? '' : initial.toString(),
+    final raw = await showAppPrompt(
+      context,
+      title: label,
+      initial: initial == 0 ? '' : initial.toString(),
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      saveLabel: l10n.common_save,
     );
-    final v = await showDialog<double>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(label),
-        content: TextField(
-          controller: ctrl,
-          autofocus: true,
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(l10n.common_cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(
-              ctx,
-              double.tryParse(ctrl.text.trim()),
-            ),
-            child: Text(l10n.common_save),
-          ),
-        ],
-      ),
-    );
+    if (raw == null) return;
+    final v = double.tryParse(raw);
     if (v == null) return;
     final uid = ref.read(currentUidProvider);
     if (uid == null) return;
@@ -496,29 +479,13 @@ class _InjuriesCard extends ConsumerWidget {
 
   Future<void> _addInjury(BuildContext context, WidgetRef ref) async {
     final l10n = AppLocalizations.of(context);
-    final ctrl = TextEditingController();
-    final result = await showDialog<String>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.onboarding_injuries),
-        content: TextField(
-          controller: ctrl,
-          autofocus: true,
-          decoration: InputDecoration(hintText: l10n.onboarding_injuriesHint),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(l10n.common_cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
-            child: Text(l10n.common_save),
-          ),
-        ],
-      ),
+    final result = await showAppPrompt(
+      context,
+      title: l10n.onboarding_injuries,
+      hint: l10n.onboarding_injuriesHint,
+      saveLabel: l10n.common_save,
     );
-    if (result == null || result.isEmpty) return;
+    if (result == null) return;
     final uid = ref.read(currentUidProvider);
     if (uid == null) return;
     final next = [...profile.injuries, result];

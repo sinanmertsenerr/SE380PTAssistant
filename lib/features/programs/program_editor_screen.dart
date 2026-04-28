@@ -6,6 +6,7 @@ import '../../core/models/program.dart';
 import '../../core/providers/providers.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
+import '../../core/ui/app_dialogs.dart';
 import '../../l10n/app_localizations.dart';
 
 class ProgramEditorScreen extends ConsumerStatefulWidget {
@@ -77,24 +78,14 @@ class _ProgramEditorScreenState extends ConsumerState<ProgramEditorScreen> {
   Future<void> _renameDay(int index) async {
     final p = _program;
     if (p == null) return;
-    final ctrl = TextEditingController(text: p.days[index].name);
-    final result = await showDialog<String>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        content: TextField(controller: ctrl, autofocus: true),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
-            child: const Text('Save'),
-          ),
-        ],
-      ),
+    final l10n = AppLocalizations.of(context);
+    final result = await showAppPrompt(
+      context,
+      title: l10n.programs_renameDay,
+      initial: p.days[index].name,
+      saveLabel: l10n.common_save,
     );
-    if (result == null || result.isEmpty) return;
+    if (result == null) return;
     setState(() {
       final next = [...p.days];
       next[index] = next[index].copyWith(name: result);
@@ -189,24 +180,14 @@ class _ProgramEditorScreenState extends ConsumerState<ProgramEditorScreen> {
           canPop: !_dirty,
           onPopInvokedWithResult: (didPop, _) async {
             if (didPop || !_dirty) return;
-            final discard = await showDialog<bool>(
-              context: context,
-              builder: (ctx) => AlertDialog(
-                title: const Text('Unsaved changes'),
-                content: const Text('Discard your edits?'),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(ctx, false),
-                    child: Text(l10n.common_cancel),
-                  ),
-                  FilledButton(
-                    onPressed: () => Navigator.pop(ctx, true),
-                    child: Text(l10n.common_dismiss),
-                  ),
-                ],
-              ),
+            final discard = await showAppConfirm(
+              context,
+              title: l10n.programs_discardTitle,
+              body: l10n.programs_discardBody,
+              confirmLabel: l10n.common_dismiss,
+              destructive: true,
             );
-            if (discard == true && context.mounted) {
+            if (discard && context.mounted) {
               Navigator.of(context).pop();
             }
           },

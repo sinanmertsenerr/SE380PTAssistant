@@ -7,6 +7,7 @@ import '../../core/models/user_profile.dart';
 import '../../core/providers/providers.dart';
 import '../../core/repositories/firestore_paths.dart';
 import '../../core/theme/app_spacing.dart';
+import '../../core/ui/app_dialogs.dart';
 import '../../l10n/app_localizations.dart';
 import '../auth/auth_controller.dart';
 import 'settings_controller.dart';
@@ -107,27 +108,14 @@ class SettingsScreen extends ConsumerWidget {
 
   Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {
     final l10n = AppLocalizations.of(context);
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.profile_deleteConfirmTitle),
-        content: Text(l10n.profile_deleteConfirmBody),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l10n.common_cancel),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
-            ),
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(l10n.common_delete),
-          ),
-        ],
-      ),
+    final confirm = await showAppConfirm(
+      context,
+      title: l10n.profile_deleteConfirmTitle,
+      body: l10n.profile_deleteConfirmBody,
+      confirmLabel: l10n.common_delete,
+      destructive: true,
     );
-    if (confirm != true) return;
+    if (!confirm) return;
     final uid = ref.read(currentUidProvider);
     final user = ref.read(currentUserProvider);
     if (uid == null || user == null) return;

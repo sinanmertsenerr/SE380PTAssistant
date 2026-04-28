@@ -7,6 +7,7 @@ import '../../core/models/program.dart';
 import '../../core/providers/providers.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
+import '../../core/ui/app_dialogs.dart';
 import '../../l10n/app_localizations.dart';
 
 enum _ProgramFilter { all, active, ai, manual }
@@ -135,29 +136,13 @@ class _ProgramsScreenState extends ConsumerState<ProgramsScreen> {
     String uid,
   ) async {
     final l10n = AppLocalizations.of(context);
-    final ctrl = TextEditingController();
-    final result = await showDialog<String>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.programs_createNew),
-        content: TextField(
-          controller: ctrl,
-          autofocus: true,
-          decoration: InputDecoration(hintText: l10n.programs_title),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(l10n.common_cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
-            child: Text(l10n.common_save),
-          ),
-        ],
-      ),
+    final result = await showAppPrompt(
+      context,
+      title: l10n.programs_createNew,
+      hint: l10n.programs_title,
+      saveLabel: l10n.common_save,
     );
-    if (result == null || result.isEmpty) return;
+    if (result == null) return;
     final id = await ref
         .read(programsRepoProvider)
         .create(
