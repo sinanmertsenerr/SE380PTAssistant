@@ -11,6 +11,7 @@ import '../../core/models/user_profile.dart';
 import '../../core/providers/providers.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/ui/app_dialogs.dart';
+import '../../core/ui/app_section_card.dart';
 import '../../core/utils/labels.dart';
 import '../../l10n/app_localizations.dart';
 
@@ -268,7 +269,7 @@ class _MetricsCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    return _SectionCard(
+    return AppSectionCard(
       eyebrow: l10n.profile_metricsTitle,
       child: Column(
         children: [
@@ -410,7 +411,7 @@ class _GoalsCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    return _SectionCard(
+    return AppSectionCard(
       eyebrow: l10n.profile_goalsTitle,
       trailing: TextButton.icon(
         onPressed: () => _editGoals(context, ref),
@@ -503,7 +504,7 @@ class _InjuriesCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    return _SectionCard(
+    return AppSectionCard(
       eyebrow: l10n.profile_injuriesTitle,
       trailing: TextButton.icon(
         onPressed: () => _addInjury(context, ref),
@@ -587,60 +588,6 @@ class _InjuriesCard extends ConsumerWidget {
                   )
                   .toList(),
             ),
-    );
-  }
-}
-
-class _SectionCard extends StatelessWidget {
-  const _SectionCard({
-    required this.eyebrow,
-    required this.child,
-    this.trailing,
-  });
-
-  final String eyebrow;
-  final Widget child;
-  final Widget? trailing;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.md + 2,
-        AppSpacing.md,
-        AppSpacing.md + 2,
-        AppSpacing.md + 2,
-      ),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusLarge),
-        border: Border.all(
-          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.25),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  eyebrow,
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 1.6,
-                  ),
-                ),
-              ),
-              ?trailing,
-            ],
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          child,
-        ],
-      ),
     );
   }
 }
