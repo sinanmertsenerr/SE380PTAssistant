@@ -80,15 +80,15 @@ class _ProgramEditorScreenState extends ConsumerState<ProgramEditorScreen> {
     final ctrl = TextEditingController(text: p.days[index].name);
     final result = await showDialog<String>(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (ctx) => AlertDialog(
         content: TextField(controller: ctrl, autofocus: true),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(ctx),
             child: const Text('Cancel'),
           ),
           FilledButton(
-            onPressed: () => Navigator.pop(context, ctrl.text.trim()),
+            onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
             child: const Text('Save'),
           ),
         ],
@@ -191,16 +191,16 @@ class _ProgramEditorScreenState extends ConsumerState<ProgramEditorScreen> {
             if (didPop || !_dirty) return;
             final discard = await showDialog<bool>(
               context: context,
-              builder: (_) => AlertDialog(
+              builder: (ctx) => AlertDialog(
                 title: const Text('Unsaved changes'),
                 content: const Text('Discard your edits?'),
                 actions: [
                   TextButton(
-                    onPressed: () => Navigator.pop(context, false),
+                    onPressed: () => Navigator.pop(ctx, false),
                     child: Text(l10n.common_cancel),
                   ),
                   FilledButton(
-                    onPressed: () => Navigator.pop(context, true),
+                    onPressed: () => Navigator.pop(ctx, true),
                     child: Text(l10n.common_dismiss),
                   ),
                 ],

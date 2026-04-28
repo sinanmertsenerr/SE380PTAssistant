@@ -138,7 +138,7 @@ class _ProgramsScreenState extends ConsumerState<ProgramsScreen> {
     final ctrl = TextEditingController();
     final result = await showDialog<String>(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (ctx) => AlertDialog(
         title: Text(l10n.programs_createNew),
         content: TextField(
           controller: ctrl,
@@ -147,11 +147,11 @@ class _ProgramsScreenState extends ConsumerState<ProgramsScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(ctx),
             child: Text(l10n.common_cancel),
           ),
           FilledButton(
-            onPressed: () => Navigator.pop(context, ctrl.text.trim()),
+            onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
             child: Text(l10n.common_save),
           ),
         ],

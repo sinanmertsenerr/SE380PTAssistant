@@ -254,7 +254,7 @@ class _MetricsCard extends ConsumerWidget {
     );
     final v = await showDialog<double>(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (ctx) => AlertDialog(
         title: Text(label),
         content: TextField(
           controller: ctrl,
@@ -263,12 +263,12 @@ class _MetricsCard extends ConsumerWidget {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(ctx),
             child: Text(l10n.common_cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(
-              context,
+              ctx,
               double.tryParse(ctrl.text.trim()),
             ),
             child: Text(l10n.common_save),
@@ -499,7 +499,7 @@ class _InjuriesCard extends ConsumerWidget {
     final ctrl = TextEditingController();
     final result = await showDialog<String>(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (ctx) => AlertDialog(
         title: Text(l10n.onboarding_injuries),
         content: TextField(
           controller: ctrl,
@@ -508,11 +508,11 @@ class _InjuriesCard extends ConsumerWidget {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(ctx),
             child: Text(l10n.common_cancel),
           ),
           FilledButton(
-            onPressed: () => Navigator.pop(context, ctrl.text.trim()),
+            onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
             child: Text(l10n.common_save),
           ),
         ],
