@@ -531,6 +531,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'I can only help with training, recovery, and sports nutrition. Ask me about your workout instead.';
 
   @override
+  String get chat_errorGeneric =>
+      'I couldn\'t respond just now. Please try again.';
+
+  @override
   String get chat_thinking => 'Thinking…';
 
   @override

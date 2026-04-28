@@ -22,7 +22,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   final _input = TextEditingController();
   final _scroll = ScrollController();
   bool _busy = false;
-  String? _lastShownToolMsgId;
+  final Set<String> _shownToolMsgIds = <String>{};
 
   @override
   void dispose() {
@@ -44,22 +44,25 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   void _maybeShowProgramSnackbar(List<ChatMessage> messages) {
     if (messages.isEmpty) return;
-    final last = messages.last;
-    if (last.role != ChatRole.tool) return;
-    if (last.id == _lastShownToolMsgId) return;
-    final programId = _programIdFromTool(last);
-    if (programId == null) return;
-    _lastShownToolMsgId = last.id;
     final l10n = AppLocalizations.of(context);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(l10n.programs_addedFromChat),
-        action: SnackBarAction(
-          label: l10n.programs_openInPrograms,
-          onPressed: () => context.go('/programs/$programId'),
+    final messenger = ScaffoldMessenger.of(context);
+    for (final m in messages) {
+      if (m.role != ChatRole.tool) continue;
+      if (m.id.isEmpty) continue;
+      if (_shownToolMsgIds.contains(m.id)) continue;
+      final programId = _programIdFromTool(m);
+      if (programId == null) continue;
+      _shownToolMsgIds.add(m.id);
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(l10n.programs_addedFromChat),
+          action: SnackBarAction(
+            label: l10n.programs_openInPrograms,
+            onPressed: () => context.go('/programs/$programId'),
+          ),
         ),
-      ),
-    );
+      );
+    }
   }
 
   Future<void> _send([String? overrideText]) async {
@@ -566,10 +569,20 @@ class _ToolCallCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final ok = message.toolResult?['ok'] == true;
+    final hasResult = message.toolResult != null;
+    final ok = hasResult && message.toolResult!['ok'] == true;
     final summary = _summary(message.toolName ?? '', l10n);
     final sources = _sources(message);
-    final accent = ok ? AppColors.activeRing : theme.colorScheme.error;
+    final accent = !hasResult
+        ? theme.colorScheme.outline
+        : ok
+        ? AppColors.activeRing
+        : theme.colorScheme.error;
+    final icon = !hasResult
+        ? Icons.help_outline_rounded
+        : ok
+        ? Icons.check_circle_rounded
+        : Icons.error_outline_rounded;
     return Padding(
       padding: const EdgeInsets.fromLTRB(36, 4, 0, 4),
       child: Container(
@@ -589,11 +602,7 @@ class _ToolCallCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(
-                  ok ? Icons.check_circle_rounded : Icons.error_outline_rounded,
-                  size: 14,
-                  color: accent,
-                ),
+                Icon(icon, size: 14, color: accent),
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(

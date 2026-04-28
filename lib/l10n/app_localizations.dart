@@ -1064,6 +1064,12 @@ abstract class AppLocalizations {
   /// **'I can only help with training, recovery, and sports nutrition. Ask me about your workout instead.'**
   String get chat_offTopicReply;
 
+  /// No description provided for @chat_errorGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'I couldn\'t respond just now. Please try again.'**
+  String get chat_errorGeneric;
+
   /// No description provided for @chat_thinking.
   ///
   /// In en, this message translates to:

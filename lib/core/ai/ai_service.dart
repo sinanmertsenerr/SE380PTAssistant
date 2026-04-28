@@ -27,16 +27,27 @@ class AiContext {
   final String locale;
 }
 
+enum AiTurnError {
+  network,
+  safetyBlocked,
+  emptyResponse,
+  toolLoopExhausted,
+  malformed,
+  unknown,
+}
+
 class AiTurn {
   const AiTurn({
     required this.text,
     required this.toolEvents,
     required this.disclaimerNeeded,
+    this.error,
   });
 
   final String text;
   final List<ToolEvent> toolEvents;
   final bool disclaimerNeeded;
+  final AiTurnError? error;
 }
 
 class ToolEvent {
@@ -122,53 +133,109 @@ class AiService {
       );
     }
 
-    final detectedLanguage = _detectLanguage(userMessage, context.locale);
-    final contextBlock = _buildContextBlock(
-      context,
-      replyLanguage: detectedLanguage,
-    );
-    final contents = <Content>[
-      Content.text(contextBlock),
-      ..._historyToContent(history),
-      Content.text(userMessage),
-    ];
-
     final events = <ToolEvent>[];
-    var iterations = 0;
-    var response = await _chatModel.generateContent(contents);
-    contents.add(response.candidates.first.content);
+    try {
+      final detectedLanguage = _detectLanguage(userMessage, context.locale);
+      final contextBlock = _buildContextBlock(
+        context,
+        replyLanguage: detectedLanguage,
+      );
+      final contents = <Content>[
+        Content.text(contextBlock),
+        ..._historyToContent(history),
+        Content.text(userMessage),
+      ];
 
-    while (response.functionCalls.isNotEmpty && iterations < 5) {
-      iterations++;
-      final responses = <FunctionResponse>[];
-      for (final call in response.functionCalls) {
-        final result = await _toolRegistry.dispatch(
-          call.name,
-          call.args.cast<String, Object?>(),
+      var iterations = 0;
+      var response = await _chatModel.generateContent(contents);
+      final firstContent = response.candidates.firstOrNull?.content;
+      if (firstContent == null) {
+        debugPrint(
+          'AI sendMessage: empty candidates on initial response (likely safety block)',
         );
-        events.add(
-          ToolEvent(
-            name: call.name,
-            args: call.args.cast<String, Object?>(),
-            result: result,
-          ),
+        return AiTurn(
+          text: '',
+          toolEvents: events,
+          disclaimerNeeded: false,
+          error: AiTurnError.safetyBlocked,
         );
-        responses.add(FunctionResponse(call.name, result));
       }
-      contents.add(Content.functionResponses(responses));
-      response = await _chatModel.generateContent(contents);
-      contents.add(response.candidates.first.content);
+      contents.add(firstContent);
+
+      while (response.functionCalls.isNotEmpty && iterations < 5) {
+        iterations++;
+        final responses = <FunctionResponse>[];
+        for (final call in response.functionCalls) {
+          final result = await _toolRegistry.dispatch(
+            call.name,
+            call.args.cast<String, Object?>(),
+          );
+          events.add(
+            ToolEvent(
+              name: call.name,
+              args: call.args.cast<String, Object?>(),
+              result: result,
+            ),
+          );
+          responses.add(FunctionResponse(call.name, result));
+        }
+        contents.add(Content.functionResponses(responses));
+        response = await _chatModel.generateContent(contents);
+        final nextContent = response.candidates.firstOrNull?.content;
+        if (nextContent == null) {
+          debugPrint(
+            'AI sendMessage: empty candidates after tool iteration $iterations '
+            '(likely safety block)',
+          );
+          return AiTurn(
+            text: '',
+            toolEvents: events,
+            disclaimerNeeded: false,
+            error: AiTurnError.safetyBlocked,
+          );
+        }
+        contents.add(nextContent);
+      }
+
+      final text = response.text?.trim() ?? '';
+      if (text.isEmpty) {
+        final reason = iterations >= 5
+            ? AiTurnError.toolLoopExhausted
+            : AiTurnError.emptyResponse;
+        debugPrint('AI sendMessage: empty text (reason: ${reason.name})');
+        return AiTurn(
+          text: '',
+          toolEvents: events,
+          disclaimerNeeded: false,
+          error: reason,
+        );
+      }
+
+      final disclaimerNeeded =
+          messageMentionsInjury(userMessage) ||
+          responseMakesMedicalClaim(text);
+      return AiTurn(
+        text: text,
+        toolEvents: events,
+        disclaimerNeeded: disclaimerNeeded,
+      );
+    } on FormatException catch (e, st) {
+      debugPrint('AI sendMessage malformed response: $e\n$st');
+      return AiTurn(
+        text: '',
+        toolEvents: events,
+        disclaimerNeeded: false,
+        error: AiTurnError.malformed,
+      );
+    } catch (e, st) {
+      debugPrint('AI sendMessage error: $e\n$st');
+      return AiTurn(
+        text: '',
+        toolEvents: events,
+        disclaimerNeeded: false,
+        error: AiTurnError.network,
+      );
     }
-
-    final text = response.text?.trim() ?? '';
-    final disclaimerNeeded =
-        messageMentionsInjury(userMessage) || responseMakesMedicalClaim(text);
-
-    return AiTurn(
-      text: text,
-      toolEvents: events,
-      disclaimerNeeded: disclaimerNeeded,
-    );
   }
 
   Future<String> generateOpeningSummary({

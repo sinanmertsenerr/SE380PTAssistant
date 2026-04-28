@@ -529,6 +529,10 @@ class AppLocalizationsTr extends AppLocalizations {
       'Sadece antrenman, toparlanma ve spor beslenmesi konularında yardımcı olabilirim. Antrenmanınla ilgili soru sor.';
 
   @override
+  String get chat_errorGeneric =>
+      'Şu anda yanıt veremedim. Tekrar dener misin?';
+
+  @override
   String get chat_thinking => 'Düşünüyor…';
 
   @override

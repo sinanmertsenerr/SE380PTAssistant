@@ -81,13 +81,17 @@ class ChatRepository {
   }
 
   Future<void> clear(String uid, {String chatId = defaultChatId}) async {
+    const pageSize = 450;
     final col = _msgCol(uid, chatId);
-    final snap = await col.get();
-    if (snap.docs.isEmpty) return;
-    final batch = _firestore.batch();
-    for (final d in snap.docs) {
-      batch.delete(d.reference);
+    while (true) {
+      final snap = await col.limit(pageSize).get();
+      if (snap.docs.isEmpty) return;
+      final batch = _firestore.batch();
+      for (final d in snap.docs) {
+        batch.delete(d.reference);
+      }
+      await batch.commit();
+      if (snap.docs.length < pageSize) return;
     }
-    await batch.commit();
   }
 }

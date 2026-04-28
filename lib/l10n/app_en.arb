@@ -177,6 +177,7 @@
   "chat_attachNote": "Pick a note",
   "chat_attachProgram": "Pick a program",
   "chat_offTopicReply": "I can only help with training, recovery, and sports nutrition. Ask me about your workout instead.",
+  "chat_errorGeneric": "I couldn't respond just now. Please try again.",
   "chat_thinking": "Thinking…",
   "chat_toolProfileUpdated": "Profile updated",
   "chat_toolProgramCreated": "Program created",

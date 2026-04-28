@@ -177,6 +177,7 @@
   "chat_attachNote": "Not seç",
   "chat_attachProgram": "Program seç",
   "chat_offTopicReply": "Sadece antrenman, toparlanma ve spor beslenmesi konularında yardımcı olabilirim. Antrenmanınla ilgili soru sor.",
+  "chat_errorGeneric": "Şu anda yanıt veremedim. Tekrar dener misin?",
   "chat_thinking": "Düşünüyor…",
   "chat_toolProfileUpdated": "Profil güncellendi",
   "chat_toolProgramCreated": "Program oluşturuldu",

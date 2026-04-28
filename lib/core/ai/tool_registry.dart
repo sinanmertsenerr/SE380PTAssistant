@@ -1,4 +1,5 @@
 import 'package:firebase_ai/firebase_ai.dart';
+import 'package:flutter/foundation.dart';
 
 import '../models/exercise.dart';
 import '../models/note.dart';
@@ -341,21 +342,52 @@ class ToolRegistry {
             type: type,
           );
           final id = await remindersRepo.create(uid, reminder);
-          await localNotifications.schedule(
-            id: id.hashCode & 0x7fffffff,
-            title: title,
-            body: body,
-            when: when,
-          );
-          return _ok({'id': id, 'scheduledFor': when.toIso8601String()});
+          var notificationScheduled = true;
+          try {
+            await localNotifications.schedule(
+              id: id.hashCode & 0x7fffffff,
+              title: title,
+              body: body,
+              when: when,
+            );
+          } catch (e, st) {
+            debugPrint(
+              'scheduleReminder: notification dispatch failed for $id: $e\n$st',
+            );
+            notificationScheduled = false;
+          }
+          return _ok({
+            'id': id,
+            'scheduledFor': when.toIso8601String(),
+            'notificationScheduled': notificationScheduled,
+          });
 
         default:
-          return _err('unknown tool: $name');
+          final known = _knownToolNames.join(', ');
+          return _err('unknown tool: $name. Valid tools: $known');
       }
-    } catch (e) {
+    } catch (e, st) {
+      debugPrint('Tool dispatch failed for "$name" with args $args: $e\n$st');
       return _err('exception: $e');
     }
   }
+
+  static const List<String> _knownToolNames = [
+    'getProfile',
+    'updateProfile',
+    'listPrograms',
+    'getProgram',
+    'createProgram',
+    'updateProgram',
+    'setActiveProgram',
+    'listNotes',
+    'getNote',
+    'createNote',
+    'updateNote',
+    'appendToNote',
+    'scheduleReminder',
+    'lookupSource',
+  ];
 
   Map<String, Object?> _ok(Map<String, Object?> payload) => {
     'ok': true,
