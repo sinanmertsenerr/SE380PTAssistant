@@ -20,21 +20,32 @@ class ChatController {
     final chatRepo = _ref.read(chatRepoProvider);
     await chatRepo.ensureDefaultChat(uid);
 
-    await chatRepo.append(
+    final userAppend = chatRepo.append(
       uid,
-      ChatMessage(
-        id: '',
-        role: ChatRole.user,
-        content: text,
-      ),
+      ChatMessage(id: '', role: ChatRole.user, content: text),
     );
 
-    final history = await chatRepo.recentMessages(uid, limit: 20);
-    final profile = await _ref.read(profileRepoProvider).get(uid);
-    final activeProgram = await _ref.read(programsRepoProvider).getActive(uid);
-    final notes = await _ref.read(notesRepoProvider).recent(uid, limit: 10);
-
     final ai = _ref.read(aiServiceProvider(uid));
+    final classifyFuture = ai.classifyMessage(text);
+    final historyFuture = chatRepo.recentMessages(uid, limit: 20);
+    final profileFuture = _ref.read(profileRepoProvider).get(uid);
+    final programFuture = _ref.read(programsRepoProvider).getActive(uid);
+    final notesFuture = _ref.read(notesRepoProvider).recent(uid, limit: 10);
+
+    final guard = await classifyFuture;
+    final fetched = await historyFuture;
+    final profile = await profileFuture;
+    final activeProgram = await programFuture;
+    final notes = await notesFuture;
+    await userAppend;
+
+    final priorHistory =
+        fetched.isNotEmpty &&
+            fetched.last.role == ChatRole.user &&
+            fetched.last.content == text
+        ? fetched.sublist(0, fetched.length - 1)
+        : fetched;
+
     final result = await ai.sendMessage(
       userMessage: text,
       context: AiContext(
@@ -43,7 +54,8 @@ class ChatController {
         recentNotes: notes,
         locale: locale,
       ),
-      history: history.where((m) => m.id != history.last.id).toList(),
+      history: priorHistory,
+      precomputedGuard: guard,
     );
 
     if (result.text == '__OFF_TOPIC__') {

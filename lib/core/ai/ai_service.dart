@@ -90,12 +90,18 @@ class AiService {
     return GeminiGuardrails(guardModel);
   }
 
+  Future<GuardrailResult> classifyMessage(String userMessage) {
+    return _guardrails.classify(userMessage);
+  }
+
   Future<AiTurn> sendMessage({
     required String userMessage,
     required AiContext context,
     required List<ChatMessage> history,
+    GuardrailResult? precomputedGuard,
   }) async {
-    final guard = await _guardrails.classify(userMessage);
+    final guard =
+        precomputedGuard ?? await _guardrails.classify(userMessage);
     if (!guard.onTopic) {
       return const AiTurn(
         text: '__OFF_TOPIC__',
