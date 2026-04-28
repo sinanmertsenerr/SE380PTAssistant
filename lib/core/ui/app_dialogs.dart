@@ -41,37 +41,77 @@ Future<String?> showAppPrompt(
   required String saveLabel,
 }) async {
   final l10n = AppLocalizations.of(context);
-  final ctrl = TextEditingController(text: initial);
-  try {
-    final result = await showDialog<String>(
-      context: context,
-      builder: (ctx) {
-        final theme = Theme.of(ctx);
-        return _AppDialogShell(
-          title: title,
-          body: body,
-          field: TextField(
-            controller: ctrl,
-            autofocus: true,
-            keyboardType: keyboardType,
-            textInputAction: TextInputAction.done,
-            onSubmitted: (v) => Navigator.pop(ctx, v.trim()),
-            decoration: InputDecoration(hintText: hint),
-          ),
-          primary: FilledButton(
-            onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
-            style: _primaryStyle(theme),
-            child: Text(saveLabel),
-          ),
-          secondaryLabel: l10n.common_cancel,
-          onSecondary: () => Navigator.pop(ctx),
-        );
-      },
+  final result = await showDialog<String>(
+    context: context,
+    builder: (ctx) => _PromptDialog(
+      title: title,
+      body: body,
+      hint: hint,
+      initial: initial,
+      keyboardType: keyboardType,
+      saveLabel: saveLabel,
+      cancelLabel: l10n.common_cancel,
+    ),
+  );
+  if (result == null || result.isEmpty) return null;
+  return result;
+}
+
+class _PromptDialog extends StatefulWidget {
+  const _PromptDialog({
+    required this.title,
+    required this.saveLabel,
+    required this.cancelLabel,
+    this.body,
+    this.hint,
+    this.initial = '',
+    this.keyboardType,
+  });
+
+  final String title;
+  final String? body;
+  final String? hint;
+  final String initial;
+  final TextInputType? keyboardType;
+  final String saveLabel;
+  final String cancelLabel;
+
+  @override
+  State<_PromptDialog> createState() => _PromptDialogState();
+}
+
+class _PromptDialogState extends State<_PromptDialog> {
+  late final TextEditingController _ctrl =
+      TextEditingController(text: widget.initial);
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return _AppDialogShell(
+      title: widget.title,
+      body: widget.body,
+      field: TextField(
+        controller: _ctrl,
+        autofocus: true,
+        keyboardType: widget.keyboardType,
+        textInputAction: TextInputAction.done,
+        onSubmitted: (v) => Navigator.pop(context, v.trim()),
+        decoration: InputDecoration(hintText: widget.hint),
+      ),
+      primary: FilledButton(
+        onPressed: () => Navigator.pop(context, _ctrl.text.trim()),
+        style: _primaryStyle(theme),
+        child: Text(widget.saveLabel),
+      ),
+      secondaryLabel: widget.cancelLabel,
+      onSecondary: () => Navigator.pop(context),
     );
-    if (result == null || result.isEmpty) return null;
-    return result;
-  } finally {
-    ctrl.dispose();
   }
 }
 
