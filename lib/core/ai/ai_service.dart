@@ -90,8 +90,16 @@ class AiService {
     return GeminiGuardrails(guardModel);
   }
 
-  Future<GuardrailResult> classifyMessage(String userMessage) {
-    return _guardrails.classify(userMessage);
+  Future<GuardrailResult> classifyMessage(
+    String userMessage, {
+    List<ChatMessage>? history,
+  }) {
+    return _guardrails.classify(
+      userMessage,
+      recentAssistantMessage: history == null
+          ? null
+          : lastAssistantContent(history),
+    );
   }
 
   Future<AiTurn> sendMessage({
@@ -101,7 +109,11 @@ class AiService {
     GuardrailResult? precomputedGuard,
   }) async {
     final guard =
-        precomputedGuard ?? await _guardrails.classify(userMessage);
+        precomputedGuard ??
+        await _guardrails.classify(
+          userMessage,
+          recentAssistantMessage: lastAssistantContent(history),
+        );
     if (!guard.onTopic) {
       return const AiTurn(
         text: '__OFF_TOPIC__',
