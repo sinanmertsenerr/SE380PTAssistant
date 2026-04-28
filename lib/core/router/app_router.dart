@@ -17,9 +17,46 @@ import '../../features/programs/session_runner_screen.dart';
 import '../providers/providers.dart';
 import 'app_shell.dart';
 
+const _shellBranches = ['/home', '/programs', '/chat', '/notes', '/profile'];
+
+int _branchIndexFor(String location) {
+  for (var i = _shellBranches.length - 1; i >= 0; i--) {
+    if (location.startsWith(_shellBranches[i])) return i;
+  }
+  return 0;
+}
+
 final goRouterProvider = Provider<GoRouter>((ref) {
   final authStream = ref.watch(authStateProvider);
   final profileStream = ref.watch(profileStreamProvider);
+
+  int? lastBranchIndex;
+
+  Page<void> branchPage(GoRouterState state, Widget child) {
+    final newIdx = _branchIndexFor(state.uri.toString());
+    final prev = lastBranchIndex;
+    final forward = prev == null || newIdx >= prev;
+    final isFirst = prev == null;
+    lastBranchIndex = newIdx;
+
+    return CustomTransitionPage<void>(
+      key: state.pageKey,
+      child: child,
+      transitionDuration: const Duration(milliseconds: 220),
+      reverseTransitionDuration: const Duration(milliseconds: 220),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        if (isFirst) return child;
+        final begin =
+            forward ? const Offset(1, 0) : const Offset(-1, 0);
+        return SlideTransition(
+          position: Tween<Offset>(begin: begin, end: Offset.zero).animate(
+            CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+          ),
+          child: child,
+        );
+      },
+    );
+  }
 
   return GoRouter(
     initialLocation: '/home',
@@ -57,11 +94,12 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         routes: [
           GoRoute(
             path: '/home',
-            builder: (_, __) => const HomeScreen(),
+            pageBuilder: (_, state) => branchPage(state, const HomeScreen()),
           ),
           GoRoute(
             path: '/programs',
-            builder: (_, __) => const ProgramsScreen(),
+            pageBuilder: (_, state) =>
+                branchPage(state, const ProgramsScreen()),
             routes: [
               GoRoute(
                 path: ':id',
@@ -86,11 +124,11 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: '/chat',
-            builder: (_, __) => const ChatScreen(),
+            pageBuilder: (_, state) => branchPage(state, const ChatScreen()),
           ),
           GoRoute(
             path: '/notes',
-            builder: (_, __) => const NotesScreen(),
+            pageBuilder: (_, state) => branchPage(state, const NotesScreen()),
             routes: [
               GoRoute(
                 path: ':id',
@@ -101,7 +139,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: '/profile',
-            builder: (_, __) => const ProfileScreen(),
+            pageBuilder: (_, state) =>
+                branchPage(state, const ProfileScreen()),
             routes: [
               GoRoute(
                 path: 'settings',
