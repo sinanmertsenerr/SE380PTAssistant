@@ -773,30 +773,34 @@ class _ComposerBar extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Expanded(
-                child: TextField(
-                  controller: controller,
-                  textCapitalization: TextCapitalization.sentences,
-                  textAlignVertical: TextAlignVertical.center,
-                  minLines: 2,
-                  maxLines: 2,
-                  style: theme.textTheme.bodyLarge?.copyWith(height: 1.35),
-                  decoration: InputDecoration(
-                    hintText: hint,
-                    hintMaxLines: 1,
-                    hintStyle: theme.textTheme.bodyLarge?.copyWith(
-                      height: 1.35,
-                      color: theme.colorScheme.onSurfaceVariant.withValues(
-                        alpha: 0.7,
+                child: SizedBox(
+                  height: 56,
+                  child: TextField(
+                    controller: controller,
+                    textCapitalization: TextCapitalization.sentences,
+                    textAlignVertical: TextAlignVertical.center,
+                    expands: true,
+                    minLines: null,
+                    maxLines: null,
+                    style: theme.textTheme.bodyLarge?.copyWith(height: 1.35),
+                    decoration: InputDecoration(
+                      hintText: hint,
+                      hintMaxLines: 1,
+                      hintStyle: theme.textTheme.bodyLarge?.copyWith(
+                        height: 1.35,
+                        color: theme.colorScheme.onSurfaceVariant.withValues(
+                          alpha: 0.7,
+                        ),
                       ),
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      filled: false,
+                      isCollapsed: true,
+                      contentPadding: EdgeInsets.zero,
                     ),
-                    border: InputBorder.none,
-                    enabledBorder: InputBorder.none,
-                    focusedBorder: InputBorder.none,
-                    filled: false,
-                    isCollapsed: true,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                    onSubmitted: (_) => onSend(),
                   ),
-                  onSubmitted: (_) => onSend(),
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
