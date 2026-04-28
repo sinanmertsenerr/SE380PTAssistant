@@ -385,6 +385,15 @@ class AppLocalizationsTr extends AppLocalizations {
   String get programs_createNew => 'Yeni program';
 
   @override
+  String get programs_renameDay => 'Gün adı';
+
+  @override
+  String get programs_discardTitle => 'Kaydedilmemiş değişiklikler';
+
+  @override
+  String get programs_discardBody => 'Düzenlemeleri iptal etmek istiyor musun?';
+
+  @override
   String get programs_setActive => 'Aktif yap';
 
   @override

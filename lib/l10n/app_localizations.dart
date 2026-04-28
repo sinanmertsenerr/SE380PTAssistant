@@ -818,6 +818,24 @@ abstract class AppLocalizations {
   /// **'New program'**
   String get programs_createNew;
 
+  /// No description provided for @programs_renameDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Day name'**
+  String get programs_renameDay;
+
+  /// No description provided for @programs_discardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsaved changes'**
+  String get programs_discardTitle;
+
+  /// No description provided for @programs_discardBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard your edits?'**
+  String get programs_discardBody;
+
   /// No description provided for @programs_setActive.
   ///
   /// In en, this message translates to:

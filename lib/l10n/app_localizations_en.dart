@@ -386,6 +386,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get programs_createNew => 'New program';
 
   @override
+  String get programs_renameDay => 'Day name';
+
+  @override
+  String get programs_discardTitle => 'Unsaved changes';
+
+  @override
+  String get programs_discardBody => 'Discard your edits?';
+
+  @override
   String get programs_setActive => 'Set active';
 
   @override
