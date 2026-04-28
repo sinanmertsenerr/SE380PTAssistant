@@ -88,8 +88,9 @@ class _ProgramsScreenState extends ConsumerState<ProgramsScreen> {
                   filter: _filter,
                   onChanged: (f) => setState(() => _filter = f),
                   background: theme.colorScheme.surface,
-                  divider: theme.colorScheme.outlineVariant
-                      .withValues(alpha: 0.4),
+                  divider: theme.colorScheme.outlineVariant.withValues(
+                    alpha: 0.4,
+                  ),
                 ),
               ),
               if (filtered.isEmpty)
@@ -196,7 +197,9 @@ class _Header extends StatelessWidget {
           Text(
             total == 0
                 ? l10n.programs_empty
-                : (total == 1 ? l10n.programs_countOne : l10n.programs_count(total)),
+                : (total == 1
+                      ? l10n.programs_countOne
+                      : l10n.programs_count(total)),
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -379,142 +382,129 @@ class _ProgramCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(AppSpacing.radiusLarge),
             border: Border.all(
               color: isActive
-                  ? AppColors.activeRing.withValues(alpha: 0.55)
+                  ? AppColors.activeRing.withValues(alpha: 0.6)
                   : theme.colorScheme.outlineVariant.withValues(alpha: 0.25),
               width: isActive ? 1.5 : 1,
             ),
           ),
-          child: IntrinsicHeight(
-            child: Row(
-              children: [
-                Container(
-                  width: 4,
-                  decoration: BoxDecoration(
-                    color: isActive ? AppColors.activeRing : Colors.transparent,
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(AppSpacing.radiusLarge),
-                      bottomLeft: Radius.circular(AppSpacing.radiusLarge),
-                    ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.md,
+                    AppSpacing.md,
+                    AppSpacing.sm,
+                    AppSpacing.md,
                   ),
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(
-                      AppSpacing.md,
-                      AppSpacing.md,
-                      AppSpacing.sm,
-                      AppSpacing.md,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.sm,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.surfaceContainerHigh,
+                              borderRadius: BorderRadius.circular(
+                                AppSpacing.radiusSmall,
+                              ),
+                            ),
+                            child: Text(
+                              dayCount == 1
+                                  ? l10n.programs_dayBadge(1)
+                                  : l10n.programs_dayBadgePlural(dayCount),
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 1.2,
+                                fontFeatures: const [
+                                  FontFeature.tabularFigures(),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: AppSpacing.xs),
+                          Text(
+                            program.source == ProgramSource.ai
+                                ? l10n.programs_sourceAi.toUpperCase()
+                                : l10n.programs_sourceManual.toUpperCase(),
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                          const Spacer(),
+                          if (isActive)
                             Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: AppSpacing.sm,
-                                vertical: 4,
+                                vertical: 3,
                               ),
                               decoration: BoxDecoration(
-                                color: theme.colorScheme.surfaceContainerHigh,
+                                color: AppColors.activeRing.withValues(
+                                  alpha: 0.16,
+                                ),
                                 borderRadius: BorderRadius.circular(
-                                  AppSpacing.radiusSmall,
+                                  AppSpacing.radiusFull,
                                 ),
                               ),
-                              child: Text(
-                                dayCount == 1
-                                    ? l10n.programs_dayBadge(1)
-                                    : l10n.programs_dayBadgePlural(dayCount),
-                                style: theme.textTheme.labelSmall?.copyWith(
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: 1.2,
-                                  fontFeatures: const [
-                                    FontFeature.tabularFigures(),
-                                  ],
-                                ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    width: 6,
+                                    height: 6,
+                                    decoration: const BoxDecoration(
+                                      color: AppColors.activeRing,
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    l10n.programs_active.toUpperCase(),
+                                    style: theme.textTheme.labelSmall?.copyWith(
+                                      color: AppColors.activeRing,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: 1.2,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                            const SizedBox(width: AppSpacing.xs),
-                            Text(
-                              program.source == ProgramSource.ai
-                                  ? l10n.programs_sourceAi.toUpperCase()
-                                  : l10n.programs_sourceManual.toUpperCase(),
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 1.2,
-                              ),
-                            ),
-                            const Spacer(),
-                            if (isActive)
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: AppSpacing.sm,
-                                  vertical: 3,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.activeRing.withValues(
-                                    alpha: 0.16,
-                                  ),
-                                  borderRadius: BorderRadius.circular(
-                                    AppSpacing.radiusFull,
-                                  ),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Container(
-                                      width: 6,
-                                      height: 6,
-                                      decoration: const BoxDecoration(
-                                        color: AppColors.activeRing,
-                                        shape: BoxShape.circle,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      l10n.programs_active.toUpperCase(),
-                                      style: theme.textTheme.labelSmall
-                                          ?.copyWith(
-                                            color: AppColors.activeRing,
-                                            fontWeight: FontWeight.w800,
-                                            letterSpacing: 1.2,
-                                          ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                          ],
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(
+                        program.title,
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.4,
                         ),
-                        const SizedBox(height: AppSpacing.sm),
-                        Text(
-                          program.title,
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -0.4,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              if (!isActive)
+                Padding(
+                  padding: const EdgeInsets.only(right: AppSpacing.sm),
+                  child: IconButton(
+                    tooltip: l10n.programs_setActive,
+                    onPressed: onSetActive,
+                    icon: const Icon(Icons.bolt_rounded),
+                    style: IconButton.styleFrom(
+                      backgroundColor: theme.colorScheme.surfaceContainerHigh,
+                      foregroundColor: theme.colorScheme.onSurface,
                     ),
                   ),
                 ),
-                if (!isActive)
-                  Padding(
-                    padding: const EdgeInsets.only(right: AppSpacing.sm),
-                    child: IconButton(
-                      tooltip: l10n.programs_setActive,
-                      onPressed: onSetActive,
-                      icon: const Icon(Icons.bolt_rounded),
-                      style: IconButton.styleFrom(
-                        backgroundColor: theme.colorScheme.surfaceContainerHigh,
-                        foregroundColor: theme.colorScheme.onSurface,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
+            ],
           ),
         ),
       ),
