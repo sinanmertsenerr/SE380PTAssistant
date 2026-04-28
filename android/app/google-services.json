@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1068273290837",
+    "project_id": "ptassistant-2f019",
+    "storage_bucket": "ptassistant-2f019.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1068273290837:android:0cc5e1a657164c21228edc",
+        "android_client_info": {
+          "package_name": "com.ptassistant.ptassistant"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBGhLsjc_BTpS_R9KacnFdpdg8A4pRqkjI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
