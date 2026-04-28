@@ -88,6 +88,8 @@ class _ProgramsScreenState extends ConsumerState<ProgramsScreen> {
                   filter: _filter,
                   onChanged: (f) => setState(() => _filter = f),
                   background: theme.colorScheme.surface,
+                  divider: theme.colorScheme.outlineVariant
+                      .withValues(alpha: 0.4),
                 ),
               ),
               if (filtered.isEmpty)
@@ -235,69 +237,115 @@ class _FilterBarDelegate extends SliverPersistentHeaderDelegate {
     required this.filter,
     required this.onChanged,
     required this.background,
+    required this.divider,
   });
 
   final _ProgramFilter filter;
   final ValueChanged<_ProgramFilter> onChanged;
   final Color background;
+  final Color divider;
 
   @override
-  double get maxExtent => 56;
+  double get maxExtent => 60;
 
   @override
-  double get minExtent => 56;
+  double get minExtent => 60;
 
   @override
   bool shouldRebuild(_FilterBarDelegate old) =>
-      old.filter != filter || old.background != background;
+      old.filter != filter ||
+      old.background != background ||
+      old.divider != divider;
 
   @override
   Widget build(BuildContext context, double shrink, bool overlaps) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
     final filters = <(_ProgramFilter, String)>[
       (_ProgramFilter.all, l10n.programs_filterAll),
       (_ProgramFilter.active, l10n.programs_filterActive),
       (_ProgramFilter.ai, l10n.programs_filterAi),
       (_ProgramFilter.manual, l10n.programs_filterManual),
     ];
-    return ColoredBox(
-      color: background,
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: background,
+        border: Border(
+          bottom: BorderSide(
+            color: overlaps ? divider : Colors.transparent,
+            width: 1,
+          ),
+        ),
+      ),
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.lg,
-          vertical: AppSpacing.sm,
+          vertical: AppSpacing.sm + 2,
         ),
         itemCount: filters.length,
-        separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.xs),
+        separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.sm),
         itemBuilder: (_, i) {
           final (f, label) = filters[i];
-          final selected = filter == f;
-          return ChoiceChip(
-            label: Text(label),
-            selected: selected,
-            onSelected: (_) => onChanged(f),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-            ),
-            side: BorderSide(
-              color: selected
-                  ? Colors.transparent
-                  : theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
-            ),
-            backgroundColor: theme.colorScheme.surface,
-            selectedColor: theme.colorScheme.primary.withValues(alpha: 0.16),
-            labelStyle: TextStyle(
-              fontWeight: FontWeight.w700,
-              color: selected
-                  ? theme.colorScheme.primary
-                  : theme.colorScheme.onSurface,
-              letterSpacing: -0.1,
-            ),
-            showCheckmark: false,
+          return _FilterPill(
+            label: label,
+            selected: filter == f,
+            onTap: () => onChanged(f),
           );
         },
+      ),
+    );
+  }
+}
+
+class _FilterPill extends StatelessWidget {
+  const _FilterPill({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final bg = selected
+        ? theme.colorScheme.primary.withValues(alpha: 0.14)
+        : theme.colorScheme.surfaceContainerLow;
+    final fg = selected
+        ? theme.colorScheme.primary
+        : theme.colorScheme.onSurface;
+    final border = selected
+        ? theme.colorScheme.primary.withValues(alpha: 0.45)
+        : theme.colorScheme.outlineVariant.withValues(alpha: 0.4);
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 160),
+          curve: Curves.easeOutCubic,
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: 8,
+          ),
+          decoration: BoxDecoration(
+            color: bg,
+            borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+            border: Border.all(color: border, width: 1),
+          ),
+          child: Text(
+            label,
+            style: theme.textTheme.labelLarge?.copyWith(
+              color: fg,
+              fontWeight: FontWeight.w700,
+              letterSpacing: -0.1,
+            ),
+          ),
+        ),
       ),
     );
   }
