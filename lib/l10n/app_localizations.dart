@@ -971,7 +971,7 @@ abstract class AppLocalizations {
   /// No description provided for @chat_inputHint.
   ///
   /// In en, this message translates to:
-  /// **'Ask about your training…'**
+  /// **'Ask anything…'**
   String get chat_inputHint;
 
   /// No description provided for @chat_clearTitle.

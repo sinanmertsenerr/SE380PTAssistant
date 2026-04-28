@@ -161,7 +161,7 @@
   "programs_restMeta": "{rest}s rest",
   "@programs_restMeta": {"placeholders": {"rest": {"type": "int"}}},
   "chat_title": "AI",
-  "chat_inputHint": "Ask about your training…",
+  "chat_inputHint": "Ask anything…",
   "chat_clearTitle": "Clear chat",
   "chat_clearBody": "All messages will be removed. You can keep going from a fresh summary.",
   "chat_clearAction": "Clear chat",

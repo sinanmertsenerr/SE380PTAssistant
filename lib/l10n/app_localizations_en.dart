@@ -479,7 +479,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get chat_title => 'AI';
 
   @override
-  String get chat_inputHint => 'Ask about your training…';
+  String get chat_inputHint => 'Ask anything…';
 
   @override
   String get chat_clearTitle => 'Clear chat';

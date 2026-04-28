@@ -243,7 +243,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get onboarding_injuries => 'Sakatlıklar / kısıtlar';
 
   @override
-  String get onboarding_injuriesHint => 'ör: sol omuzda sıkışma';
+  String get onboarding_injuriesHint => 'örn: sol omuzda sıkışma';
 
   @override
   String get onboarding_weeklySessions => 'Haftalık antrenman sayısı';
@@ -319,7 +319,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get home_aiNudgeNoneBody =>
-      'Notlarını güncel tut, AI yeni fikirler önerecek.';
+      'Notlarını güncel tut, AI sana yeni fikirler önerecek.';
 
   @override
   String get home_quickLogWeight => 'Kilo gir';
@@ -478,7 +478,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get chat_title => 'AI';
 
   @override
-  String get chat_inputHint => 'Antrenmanını sor…';
+  String get chat_inputHint => 'Bir şey sor…';
 
   @override
   String get chat_clearTitle => 'Sohbeti temizle';
