@@ -31,7 +31,11 @@ class AppShell extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final idx = _currentIndex(context);
     return Scaffold(
-      body: child,
+      body: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        child: child,
+      ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: idx,
         onDestinationSelected: (i) {
