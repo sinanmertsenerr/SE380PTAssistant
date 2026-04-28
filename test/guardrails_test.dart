@@ -77,6 +77,37 @@ void main() {
     });
   });
 
+  group('parseRetryAfter', () {
+    test('parses integer seconds', () {
+      final d = parseRetryAfter('Quota exceeded. Please retry in 17s.');
+      expect(d, isNotNull);
+      expect(d!.inSeconds, 17);
+    });
+
+    test('parses decimal seconds and rounds to milliseconds', () {
+      final d = parseRetryAfter('Please retry in 9.388509258s.');
+      expect(d, isNotNull);
+      expect(d!.inMilliseconds, 9389);
+    });
+
+    test('is case-insensitive on the marker phrase', () {
+      final d = parseRetryAfter('Please RETRY IN 5S.');
+      expect(d, isNotNull);
+      expect(d!.inSeconds, 5);
+    });
+
+    test('returns null for non-quota errors', () {
+      expect(parseRetryAfter('Network unreachable'), isNull);
+      expect(parseRetryAfter(''), isNull);
+      expect(parseRetryAfter('quota exceeded but no retry hint'), isNull);
+    });
+
+    test('returns null when the seconds value is missing or malformed', () {
+      expect(parseRetryAfter('retry in s'), isNull);
+      expect(parseRetryAfter('retry in xs'), isNull);
+    });
+  });
+
   group('buildGuardPrompt', () {
     test('omits prior-turn block when context is null', () {
       final p = buildGuardPrompt('onayliyorum', null);

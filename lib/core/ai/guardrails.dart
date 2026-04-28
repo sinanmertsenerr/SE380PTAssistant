@@ -8,10 +8,26 @@ import '../models/chat_message.dart';
 const int guardContextCharLimit = 500;
 
 class GuardrailResult {
-  const GuardrailResult({required this.onTopic, required this.reason});
+  const GuardrailResult({
+    required this.onTopic,
+    required this.reason,
+    this.retryAfter,
+  });
 
   final bool onTopic;
   final String reason;
+  final Duration? retryAfter;
+}
+
+Duration? parseRetryAfter(String error) {
+  final match = RegExp(
+    r'retry\s+in\s+(\d+(?:\.\d+)?)s',
+    caseSensitive: false,
+  ).firstMatch(error);
+  if (match == null) return null;
+  final seconds = double.tryParse(match.group(1)!);
+  if (seconds == null) return null;
+  return Duration(milliseconds: (seconds * 1000).round());
 }
 
 abstract interface class Guardrails {
@@ -41,7 +57,12 @@ class GeminiGuardrails implements Guardrails {
       return GuardrailResult(onTopic: onTopic, reason: reason);
     } catch (e, st) {
       debugPrint('Guardrails classify error: $e\n$st');
-      return const GuardrailResult(onTopic: true, reason: 'fallback');
+      final retry = parseRetryAfter(e.toString());
+      return GuardrailResult(
+        onTopic: true,
+        reason: retry != null ? 'rateLimited' : 'fallback',
+        retryAfter: retry,
+      );
     }
   }
 }

@@ -1070,6 +1070,12 @@ abstract class AppLocalizations {
   /// **'I couldn\'t respond just now. Please try again.'**
   String get chat_errorGeneric;
 
+  /// No description provided for @chat_errorRateLimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Hit the request limit. Try again in {seconds}s.'**
+  String chat_errorRateLimited(int seconds);
+
   /// No description provided for @chat_thinking.
   ///
   /// In en, this message translates to:

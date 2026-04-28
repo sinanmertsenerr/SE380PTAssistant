@@ -178,6 +178,8 @@
   "chat_attachProgram": "Program seç",
   "chat_offTopicReply": "Sadece antrenman, toparlanma ve spor beslenmesi konularında yardımcı olabilirim. Antrenmanınla ilgili soru sor.",
   "chat_errorGeneric": "Şu anda yanıt veremedim. Tekrar dener misin?",
+  "chat_errorRateLimited": "İstek limitine ulaştın. {seconds} sn sonra tekrar dene.",
+  "@chat_errorRateLimited": {"placeholders": {"seconds": {"type": "int"}}},
   "chat_thinking": "Düşünüyor…",
   "chat_toolProfileUpdated": "Profil güncellendi",
   "chat_toolProgramCreated": "Program oluşturuldu",

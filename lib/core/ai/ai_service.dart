@@ -33,6 +33,7 @@ enum AiTurnError {
   emptyResponse,
   toolLoopExhausted,
   malformed,
+  rateLimited,
   unknown,
 }
 
@@ -42,12 +43,14 @@ class AiTurn {
     required this.toolEvents,
     required this.disclaimerNeeded,
     this.error,
+    this.retryAfter,
   });
 
   final String text;
   final List<ToolEvent> toolEvents;
   final bool disclaimerNeeded;
   final AiTurnError? error;
+  final Duration? retryAfter;
 }
 
 class ToolEvent {
@@ -229,11 +232,13 @@ class AiService {
       );
     } catch (e, st) {
       debugPrint('AI sendMessage error: $e\n$st');
+      final retry = parseRetryAfter(e.toString());
       return AiTurn(
         text: '',
         toolEvents: events,
         disclaimerNeeded: false,
-        error: AiTurnError.network,
+        error: retry != null ? AiTurnError.rateLimited : AiTurnError.network,
+        retryAfter: retry,
       );
     }
   }

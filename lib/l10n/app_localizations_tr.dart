@@ -533,6 +533,11 @@ class AppLocalizationsTr extends AppLocalizations {
       'Şu anda yanıt veremedim. Tekrar dener misin?';
 
   @override
+  String chat_errorRateLimited(int seconds) {
+    return 'İstek limitine ulaştın. $seconds sn sonra tekrar dene.';
+  }
+
+  @override
   String get chat_thinking => 'Düşünüyor…';
 
   @override

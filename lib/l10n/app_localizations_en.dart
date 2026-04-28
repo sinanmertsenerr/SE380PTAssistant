@@ -535,6 +535,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'I couldn\'t respond just now. Please try again.';
 
   @override
+  String chat_errorRateLimited(int seconds) {
+    return 'Hit the request limit. Try again in ${seconds}s.';
+  }
+
+  @override
   String get chat_thinking => 'Thinking…';
 
   @override

@@ -22,6 +22,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   final _input = TextEditingController();
   final _scroll = ScrollController();
   bool _busy = false;
+  bool _cooling = false;
   final Set<String> _shownToolMsgIds = <String>{};
 
   @override
@@ -67,7 +68,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   Future<void> _send([String? overrideText]) async {
     final text = (overrideText ?? _input.text).trim();
-    if (text.isEmpty || _busy) return;
+    if (text.isEmpty || _busy || _cooling) return;
     final uid = ref.read(currentUidProvider);
     if (uid == null) return;
     final l10n = AppLocalizations.of(context);
@@ -75,13 +76,20 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     setState(() => _busy = true);
     _input.clear();
     await HapticFeedback.selectionClick();
+    Duration? cooldown;
     try {
-      await ref
+      cooldown = await ref
           .read(chatControllerProvider)
           .sendUserMessage(uid: uid, text: text, locale: locale, l10n: l10n);
     } finally {
       if (mounted) setState(() => _busy = false);
       _scrollToEnd();
+    }
+    if (cooldown != null && cooldown.inMilliseconds > 0) {
+      if (!mounted) return;
+      setState(() => _cooling = true);
+      await Future<void>.delayed(cooldown);
+      if (mounted) setState(() => _cooling = false);
     }
   }
 
@@ -145,7 +153,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             if (_busy) _ThinkingIndicator(label: l10n.chat_thinking),
             _ComposerBar(
               controller: _input,
-              busy: _busy,
+              busy: _busy || _cooling,
               onSend: _send,
               hint: l10n.chat_inputHint,
               attachLabel: l10n.chat_attachLabel,

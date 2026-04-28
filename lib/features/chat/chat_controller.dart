@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/ai/ai_service.dart';
 import '../../core/models/chat_message.dart';
 import '../../core/providers/providers.dart';
+import '../../core/repositories/chat_repository.dart';
 import '../../l10n/app_localizations.dart';
 
 class ChatController {
@@ -11,13 +12,13 @@ class ChatController {
 
   final Ref _ref;
 
-  Future<void> sendUserMessage({
+  Future<Duration?> sendUserMessage({
     required String uid,
     required String text,
     required String locale,
     required AppLocalizations l10n,
   }) async {
-    if (text.trim().isEmpty) return;
+    if (text.trim().isEmpty) return null;
     final chatRepo = _ref.read(chatRepoProvider);
 
     try {
@@ -42,6 +43,11 @@ class ChatController {
           : fetched;
 
       final guard = await ai.classifyMessage(text, history: priorHistory);
+      if (guard.retryAfter != null) {
+        await _appendRateLimitMessage(chatRepo, uid, guard.retryAfter!, l10n);
+        return guard.retryAfter;
+      }
+
       final profile = await profileFuture;
       final activeProgram = await programFuture;
       final notes = await notesFuture;
@@ -63,7 +69,7 @@ class ChatController {
           'sendUserMessage: user switched mid-conversation; '
           'abandoning model writes for $uid',
         );
-        return;
+        return null;
       }
 
       if (result.text == '__OFF_TOPIC__') {
@@ -75,7 +81,7 @@ class ChatController {
             content: l10n.chat_offTopicReply,
           ),
         );
-        return;
+        return null;
       }
 
       for (final event in result.toolEvents) {
@@ -91,6 +97,11 @@ class ChatController {
         );
       }
 
+      if (result.retryAfter != null) {
+        await _appendRateLimitMessage(chatRepo, uid, result.retryAfter!, l10n);
+        return result.retryAfter;
+      }
+
       if (result.error != null || result.text.isEmpty) {
         await chatRepo.append(
           uid,
@@ -100,7 +111,7 @@ class ChatController {
             content: l10n.chat_errorGeneric,
           ),
         );
-        return;
+        return null;
       }
 
       final body = result.disclaimerNeeded
@@ -111,6 +122,7 @@ class ChatController {
         uid,
         ChatMessage(id: '', role: ChatRole.model, content: body),
       );
+      return null;
     } catch (e, st) {
       debugPrint('sendUserMessage failed: $e\n$st');
       try {
@@ -125,7 +137,25 @@ class ChatController {
       } catch (e2, st2) {
         debugPrint('sendUserMessage: fallback persist failed: $e2\n$st2');
       }
+      return null;
     }
+  }
+
+  Future<void> _appendRateLimitMessage(
+    ChatRepository chatRepo,
+    String uid,
+    Duration retryAfter,
+    AppLocalizations l10n,
+  ) async {
+    final seconds = (retryAfter.inMilliseconds / 1000).ceil().clamp(1, 999);
+    await chatRepo.append(
+      uid,
+      ChatMessage(
+        id: '',
+        role: ChatRole.model,
+        content: l10n.chat_errorRateLimited(seconds),
+      ),
+    );
   }
 
   Future<void> clearAndOpen({
