@@ -24,7 +24,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
   final _injuries = TextEditingController();
 
   DateTime? _dob;
-  Sex _sex = Sex.other;
+  Sex _sex = Sex.male;
   ExperienceLevel _experience = ExperienceLevel.beginner;
   final Set<FitnessGoal> _goals = {};
   final Set<Equipment> _equipment = {};
@@ -197,7 +197,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
           const SizedBox(height: AppSpacing.sm),
           Wrap(
             spacing: AppSpacing.sm,
-            children: Sex.values.map((s) {
+            children: Sex.values.where((s) => s != Sex.other).map((s) {
               final selected = _sex == s;
               return ChoiceChip(
                 label: Text(_sexLabel(l10n, s)),
