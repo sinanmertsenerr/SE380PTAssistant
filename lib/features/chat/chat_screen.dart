@@ -24,6 +24,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   bool _busy = false;
   bool _cooling = false;
   final Set<String> _shownToolMsgIds = <String>{};
+  final Set<String> _importInFlight = <String>{};
 
   @override
   void dispose() {
@@ -63,6 +64,96 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           ),
         ),
       );
+    }
+  }
+
+  static const _programHints = <String>[
+    'gün:',
+    'gün ',
+    'day:',
+    'day ',
+    'set',
+    'tekrar',
+    'reps',
+    'push',
+    'pull',
+    'leg',
+    'bacak',
+    'göğüs',
+    'sırt',
+    'omuz',
+    'biceps',
+    'triceps',
+    'split',
+    'antrenman',
+    'workout',
+    'press',
+    'squat',
+    'deadlift',
+    'curl',
+    'row',
+  ];
+
+  bool _looksLikeProgram(String content) {
+    if (content.length < 80) return false;
+    final lower = content.toLowerCase();
+    var hits = 0;
+    for (final h in _programHints) {
+      if (lower.contains(h)) {
+        hits++;
+        if (hits >= 4) return true;
+      }
+    }
+    return false;
+  }
+
+  bool _alreadySavedAsProgram(List<ChatMessage> messages, int index) {
+    for (var j = index + 1; j < messages.length; j++) {
+      final m = messages[j];
+      if (m.role == ChatRole.user) return false;
+      if (m.role == ChatRole.tool &&
+          (m.toolName == 'createProgram' ||
+              m.toolName == 'updateProgram') &&
+          m.toolResult?['ok'] == true) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  String _extractProgramTitle(String content) {
+    final lines = content.split('\n');
+    for (final raw in lines) {
+      final line = raw.trim();
+      if (line.isEmpty) continue;
+      final clean = line
+          .replaceAll(RegExp(r'^[#>*\-•\d.\s]+'), '')
+          .replaceAll(RegExp('[*_`]'), '')
+          .trim();
+      if (clean.length < 8) continue;
+      var snippet = clean.length > 80 ? clean.substring(0, 80) : clean;
+      final colonIdx = snippet.indexOf(':');
+      if (colonIdx > 10 && colonIdx < snippet.length - 1) {
+        snippet = snippet.substring(0, colonIdx).trim();
+      }
+      return snippet;
+    }
+    final flat = content.replaceAll('\n', ' ').trim();
+    return flat.length > 60 ? flat.substring(0, 60) : flat;
+  }
+
+  Future<void> _importProgram(ChatMessage message) async {
+    if (_busy || _cooling) return;
+    if (message.id.isEmpty) return;
+    if (_importInFlight.contains(message.id)) return;
+    final l10n = AppLocalizations.of(context);
+    final title = _extractProgramTitle(message.content);
+    final instruction = l10n.chat_importProgramInstruction(title);
+    setState(() => _importInFlight.add(message.id));
+    try {
+      await _send(instruction);
+    } finally {
+      if (mounted) setState(() => _importInFlight.remove(message.id));
     }
   }
 
@@ -141,9 +232,19 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       final showAvatar =
                           m.role == ChatRole.model &&
                           (i == 0 || messages[i - 1].role != ChatRole.model);
+                      final canImport =
+                          m.role == ChatRole.model &&
+                          m.id.isNotEmpty &&
+                          _looksLikeProgram(m.content) &&
+                          !_alreadySavedAsProgram(messages, i);
                       return _MessageBubble(
                         message: m,
                         showAiAvatar: showAvatar,
+                        onImport: canImport
+                            ? () => _importProgram(m)
+                            : null,
+                        importing: _importInFlight.contains(m.id),
+                        importDisabled: _busy || _cooling,
                       );
                     },
                   );
@@ -464,10 +565,19 @@ class _StarterPrompts extends StatelessWidget {
 }
 
 class _MessageBubble extends StatelessWidget {
-  const _MessageBubble({required this.message, required this.showAiAvatar});
+  const _MessageBubble({
+    required this.message,
+    required this.showAiAvatar,
+    this.onImport,
+    this.importing = false,
+    this.importDisabled = false,
+  });
 
   final ChatMessage message;
   final bool showAiAvatar;
+  final VoidCallback? onImport;
+  final bool importing;
+  final bool importDisabled;
 
   @override
   Widget build(BuildContext context) {
@@ -531,38 +641,121 @@ class _MessageBubble extends StatelessWidget {
               constraints: BoxConstraints(
                 maxWidth: MediaQuery.of(context).size.width * 0.78,
               ),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.md,
-                  vertical: AppSpacing.sm + 2,
-                ),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceContainerLow,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(AppSpacing.radiusSmall),
-                    topRight: Radius.circular(AppSpacing.radiusLarge),
-                    bottomLeft: Radius.circular(AppSpacing.radiusLarge),
-                    bottomRight: Radius.circular(AppSpacing.radiusLarge),
-                  ),
-                  border: Border.all(
-                    color: theme.colorScheme.outlineVariant.withValues(
-                      alpha: 0.25,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.md,
+                      vertical: AppSpacing.sm + 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surfaceContainerLow,
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(AppSpacing.radiusSmall),
+                        topRight: Radius.circular(AppSpacing.radiusLarge),
+                        bottomLeft: Radius.circular(AppSpacing.radiusLarge),
+                        bottomRight: Radius.circular(AppSpacing.radiusLarge),
+                      ),
+                      border: Border.all(
+                        color: theme.colorScheme.outlineVariant.withValues(
+                          alpha: 0.25,
+                        ),
+                      ),
+                    ),
+                    child: MarkdownBody(
+                      data: message.content,
+                      styleSheet: MarkdownStyleSheet.fromTheme(theme).copyWith(
+                        p: theme.textTheme.bodyLarge?.copyWith(
+                          color: theme.colorScheme.onSurface,
+                          height: 1.45,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-                child: MarkdownBody(
-                  data: message.content,
-                  styleSheet: MarkdownStyleSheet.fromTheme(theme).copyWith(
-                    p: theme.textTheme.bodyLarge?.copyWith(
-                      color: theme.colorScheme.onSurface,
-                      height: 1.45,
+                  if (onImport != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: AppSpacing.sm),
+                      child: _ImportProgramButton(
+                        onPressed: importDisabled || importing
+                            ? null
+                            : onImport,
+                        loading: importing,
+                      ),
                     ),
-                  ),
-                ),
+                ],
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ImportProgramButton extends StatelessWidget {
+  const _ImportProgramButton({
+    required this.onPressed,
+    required this.loading,
+  });
+
+  final VoidCallback? onPressed;
+  final bool loading;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
+    final accent = theme.colorScheme.primary;
+    final label = loading ? l10n.chat_importingProgram : l10n.chat_importProgram;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 44),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.sm,
+          ),
+          decoration: BoxDecoration(
+            color: accent.withValues(alpha: onPressed == null ? 0.06 : 0.12),
+            borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+            border: Border.all(
+              color: accent.withValues(alpha: onPressed == null ? 0.18 : 0.36),
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (loading)
+                SizedBox(
+                  width: 14,
+                  height: 14,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 1.8,
+                    color: accent,
+                  ),
+                )
+              else
+                Icon(Icons.fitness_center_rounded, size: 16, color: accent),
+              const SizedBox(width: AppSpacing.sm),
+              Flexible(
+                child: Text(
+                  label,
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: accent,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.1,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

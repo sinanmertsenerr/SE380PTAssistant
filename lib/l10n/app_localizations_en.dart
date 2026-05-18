@@ -577,6 +577,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get chat_attachLabel => 'Attach';
 
   @override
+  String get chat_importProgram => 'Add to my programs';
+
+  @override
+  String get chat_importingProgram => 'Saving to programs…';
+
+  @override
+  String chat_importProgramInstruction(String title) {
+    return 'Save the program above ($title) to my Programs using createProgram. Tool call only — no extra prose.';
+  }
+
+  @override
   String get notes_title => 'Notes';
 
   @override

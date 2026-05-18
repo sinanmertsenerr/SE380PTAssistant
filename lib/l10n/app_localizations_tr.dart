@@ -575,6 +575,17 @@ class AppLocalizationsTr extends AppLocalizations {
   String get chat_attachLabel => 'Ekle';
 
   @override
+  String get chat_importProgram => 'Programlarıma ekle';
+
+  @override
+  String get chat_importingProgram => 'Programa kaydediliyor…';
+
+  @override
+  String chat_importProgramInstruction(String title) {
+    return 'Yukarıdaki programı ($title) createProgram aracıyla Programlarıma ekle. Sadece tool çağrısı yap, ek metin yazma.';
+  }
+
+  @override
   String get notes_title => 'Notlar';
 
   @override

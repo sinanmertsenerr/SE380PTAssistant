@@ -1148,6 +1148,24 @@ abstract class AppLocalizations {
   /// **'Attach'**
   String get chat_attachLabel;
 
+  /// No description provided for @chat_importProgram.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to my programs'**
+  String get chat_importProgram;
+
+  /// No description provided for @chat_importingProgram.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving to programs…'**
+  String get chat_importingProgram;
+
+  /// No description provided for @chat_importProgramInstruction.
+  ///
+  /// In en, this message translates to:
+  /// **'Save the program above ({title}) to my Programs using createProgram. Tool call only — no extra prose.'**
+  String chat_importProgramInstruction(String title);
+
   /// No description provided for @notes_title.
   ///
   /// In en, this message translates to:
