@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
@@ -23,11 +25,28 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   final _scroll = ScrollController();
   bool _busy = false;
   bool _cooling = false;
+  bool _autoScroll = true;
+  int _lastMsgCount = 0;
+  int _cooldownSeconds = 0;
+  Timer? _cooldownTimer;
   final Set<String> _shownToolMsgIds = <String>{};
   final Set<String> _importInFlight = <String>{};
 
   @override
+  void initState() {
+    super.initState();
+    _scroll.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    if (!_scroll.hasClients) return;
+    _autoScroll = _scroll.position.maxScrollExtent - _scroll.offset < 120;
+  }
+
+  @override
   void dispose() {
+    _cooldownTimer?.cancel();
+    _scroll.removeListener(_onScroll);
     _input.dispose();
     _scroll.dispose();
     super.dispose();
@@ -164,6 +183,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     if (uid == null) return;
     final l10n = AppLocalizations.of(context);
     final locale = Localizations.localeOf(context).languageCode;
+    _autoScroll = true;
     setState(() => _busy = true);
     _input.clear();
     await HapticFeedback.selectionClick();
@@ -176,12 +196,30 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       if (mounted) setState(() => _busy = false);
       _scrollToEnd();
     }
-    if (cooldown != null && cooldown.inMilliseconds > 0) {
-      if (!mounted) return;
-      setState(() => _cooling = true);
-      await Future<void>.delayed(cooldown);
-      if (mounted) setState(() => _cooling = false);
+    if (cooldown != null && cooldown.inMilliseconds > 0 && mounted) {
+      _startCooldown(cooldown);
     }
+  }
+
+  void _startCooldown(Duration cooldown) {
+    _cooldownTimer?.cancel();
+    setState(() {
+      _cooling = true;
+      _cooldownSeconds = (cooldown.inMilliseconds / 1000).ceil().clamp(1, 999);
+    });
+    _cooldownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+      setState(() {
+        _cooldownSeconds -= 1;
+        if (_cooldownSeconds <= 0) {
+          _cooling = false;
+          timer.cancel();
+        }
+      });
+    });
   }
 
   void _scrollToEnd() {
@@ -212,7 +250,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 error: (e, _) => Center(child: Text(l10n.errors_generic)),
                 data: (messages) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
-                    _scrollToEnd();
+                    final hasNew = messages.length > _lastMsgCount;
+                    _lastMsgCount = messages.length;
+                    if (hasNew && _autoScroll) _scrollToEnd();
                     _maybeShowProgramSnackbar(messages);
                   });
                   if (messages.isEmpty) {
@@ -251,7 +291,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 },
               ),
             ),
-            if (_busy) _ThinkingIndicator(label: l10n.chat_thinking),
+            if (_busy)
+              _ThinkingIndicator(label: l10n.chat_thinking)
+            else if (_cooling)
+              _CooldownIndicator(
+                message: l10n.chat_errorRateLimited(_cooldownSeconds),
+              ),
             _ComposerBar(
               controller: _input,
               busy: _busy || _cooling,
@@ -934,6 +979,44 @@ class _ThinkingIndicator extends StatelessWidget {
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
               fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CooldownIndicator extends StatelessWidget {
+  const _CooldownIndicator({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.xs,
+        AppSpacing.lg,
+        AppSpacing.xs,
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.hourglass_bottom_rounded,
+            size: 16,
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              message,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],

@@ -43,6 +43,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
   }
 
   Future<void> _next() async {
+    if (_step == 1 && !_validateMetrics()) return;
     if (_step < 2) {
       setState(() => _step += 1);
       await _pageController.nextPage(
@@ -52,6 +53,27 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
     } else {
       await _finish();
     }
+  }
+
+  bool _validateMetrics() {
+    final l10n = AppLocalizations.of(context);
+    final height = double.tryParse(_heightCm.text.trim().replaceAll(',', '.'));
+    final weight = double.tryParse(_weightKg.text.trim().replaceAll(',', '.'));
+    if (height == null || height < 80 || height > 250) {
+      _showMetricError('${l10n.onboarding_height} • 80–250 cm');
+      return false;
+    }
+    if (weight == null || weight < 25 || weight > 350) {
+      _showMetricError('${l10n.onboarding_weight} • 25–350 kg');
+      return false;
+    }
+    return true;
+  }
+
+  void _showMetricError(String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
   }
 
   Future<void> _back() async {
@@ -66,6 +88,8 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
   Future<void> _finish() async {
     final uid = ref.read(currentUidProvider);
     if (uid == null) return;
+    final messenger = ScaffoldMessenger.of(context);
+    final l10n = AppLocalizations.of(context);
     setState(() => _busy = true);
     final injuries = _injuries.text
         .split(',')
@@ -77,8 +101,8 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
       'lastName': _lastName.text.trim(),
       'dob': _dob,
       'sex': _sex.name,
-      'heightCm': double.tryParse(_heightCm.text) ?? 0,
-      'weightKg': double.tryParse(_weightKg.text) ?? 0,
+      'heightCm': double.tryParse(_heightCm.text.trim().replaceAll(',', '.')) ?? 0,
+      'weightKg': double.tryParse(_weightKg.text.trim().replaceAll(',', '.')) ?? 0,
       'experienceLevel': _experience.name,
       'goals': _goals.map((g) => g.name).toList(),
       'equipment': _equipment.map((e) => e.name).toList(),
@@ -86,7 +110,16 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
       'weeklySessions': _weeklySessions,
       'onboardingComplete': true,
     };
-    await ref.read(profileRepoProvider).update(uid, patch);
+    try {
+      await ref.read(profileRepoProvider).update(uid, patch);
+    } catch (e, st) {
+      debugPrint('onboarding finish failed: $e\n$st');
+      if (mounted) {
+        setState(() => _busy = false);
+        messenger.showSnackBar(SnackBar(content: Text(l10n.errors_generic)));
+      }
+      return;
+    }
     if (mounted) setState(() => _busy = false);
   }
 

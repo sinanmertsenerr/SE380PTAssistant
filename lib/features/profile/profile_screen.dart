@@ -95,6 +95,8 @@ class _ProfileHero extends ConsumerWidget {
   final UserProfile profile;
 
   Future<void> _pickPhoto(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
     final picker = ImagePicker();
     final picked = await picker.pickImage(
       source: ImageSource.gallery,
@@ -122,11 +124,16 @@ class _ProfileHero extends ConsumerWidget {
     if (cropped == null) return;
     final uid = ref.read(currentUidProvider);
     if (uid == null) return;
-    final storage = ref.read(firebaseStorageProvider);
-    final ref0 = storage.ref().child('users/$uid/avatar.jpg');
-    await ref0.putFile(File(cropped.path));
-    final url = await ref0.getDownloadURL();
-    await ref.read(profileRepoProvider).update(uid, {'photoUrl': url});
+    try {
+      final storage = ref.read(firebaseStorageProvider);
+      final ref0 = storage.ref().child('users/$uid/avatar.jpg');
+      await ref0.putFile(File(cropped.path));
+      final url = await ref0.getDownloadURL();
+      await ref.read(profileRepoProvider).update(uid, {'photoUrl': url});
+    } catch (e, st) {
+      debugPrint('avatar upload failed: $e\n$st');
+      messenger.showSnackBar(SnackBar(content: Text(l10n.errors_generic)));
+    }
   }
 
   @override
