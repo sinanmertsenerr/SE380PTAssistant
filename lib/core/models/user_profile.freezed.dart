@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$UserProfile {
 
- String get uid; String get firstName; String get lastName; String? get photoUrl;@NullableTimestampConverter() DateTime? get dob; Sex get sex; double get heightCm; double get weightKg; List<FitnessGoal> get goals; ExperienceLevel get experienceLevel; List<String> get injuries; List<Equipment> get equipment; int get weeklySessions; String get locale; AppThemeMode get themeMode; bool get notificationsEnabled; bool get onboardingComplete;@TimestampConverter() DateTime? get createdAt;@TimestampConverter() DateTime? get updatedAt;
+ String get uid; String get firstName; String get lastName; String? get photoUrl;@NullableTimestampConverter() DateTime? get dob;@JsonKey(unknownEnumValue: Sex.male) Sex get sex; double get heightCm; double get weightKg; List<FitnessGoal> get goals; ExperienceLevel get experienceLevel; List<String> get injuries; List<Equipment> get equipment; int get weeklySessions; String get locale; AppThemeMode get themeMode; bool get notificationsEnabled; bool get onboardingComplete;@TimestampConverter() DateTime? get createdAt;@TimestampConverter() DateTime? get updatedAt;
 /// Create a copy of UserProfile
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,7 +48,7 @@ abstract mixin class $UserProfileCopyWith<$Res>  {
   factory $UserProfileCopyWith(UserProfile value, $Res Function(UserProfile) _then) = _$UserProfileCopyWithImpl;
 @useResult
 $Res call({
- String uid, String firstName, String lastName, String? photoUrl,@NullableTimestampConverter() DateTime? dob, Sex sex, double heightCm, double weightKg, List<FitnessGoal> goals, ExperienceLevel experienceLevel, List<String> injuries, List<Equipment> equipment, int weeklySessions, String locale, AppThemeMode themeMode, bool notificationsEnabled, bool onboardingComplete,@TimestampConverter() DateTime? createdAt,@TimestampConverter() DateTime? updatedAt
+ String uid, String firstName, String lastName, String? photoUrl,@NullableTimestampConverter() DateTime? dob,@JsonKey(unknownEnumValue: Sex.male) Sex sex, double heightCm, double weightKg, List<FitnessGoal> goals, ExperienceLevel experienceLevel, List<String> injuries, List<Equipment> equipment, int weeklySessions, String locale, AppThemeMode themeMode, bool notificationsEnabled, bool onboardingComplete,@TimestampConverter() DateTime? createdAt,@TimestampConverter() DateTime? updatedAt
 });
 
 
@@ -171,7 +171,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String uid,  String firstName,  String lastName,  String? photoUrl, @NullableTimestampConverter()  DateTime? dob,  Sex sex,  double heightCm,  double weightKg,  List<FitnessGoal> goals,  ExperienceLevel experienceLevel,  List<String> injuries,  List<Equipment> equipment,  int weeklySessions,  String locale,  AppThemeMode themeMode,  bool notificationsEnabled,  bool onboardingComplete, @TimestampConverter()  DateTime? createdAt, @TimestampConverter()  DateTime? updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String uid,  String firstName,  String lastName,  String? photoUrl, @NullableTimestampConverter()  DateTime? dob, @JsonKey(unknownEnumValue: Sex.male)  Sex sex,  double heightCm,  double weightKg,  List<FitnessGoal> goals,  ExperienceLevel experienceLevel,  List<String> injuries,  List<Equipment> equipment,  int weeklySessions,  String locale,  AppThemeMode themeMode,  bool notificationsEnabled,  bool onboardingComplete, @TimestampConverter()  DateTime? createdAt, @TimestampConverter()  DateTime? updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _UserProfile() when $default != null:
 return $default(_that.uid,_that.firstName,_that.lastName,_that.photoUrl,_that.dob,_that.sex,_that.heightCm,_that.weightKg,_that.goals,_that.experienceLevel,_that.injuries,_that.equipment,_that.weeklySessions,_that.locale,_that.themeMode,_that.notificationsEnabled,_that.onboardingComplete,_that.createdAt,_that.updatedAt);case _:
@@ -192,7 +192,7 @@ return $default(_that.uid,_that.firstName,_that.lastName,_that.photoUrl,_that.do
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String uid,  String firstName,  String lastName,  String? photoUrl, @NullableTimestampConverter()  DateTime? dob,  Sex sex,  double heightCm,  double weightKg,  List<FitnessGoal> goals,  ExperienceLevel experienceLevel,  List<String> injuries,  List<Equipment> equipment,  int weeklySessions,  String locale,  AppThemeMode themeMode,  bool notificationsEnabled,  bool onboardingComplete, @TimestampConverter()  DateTime? createdAt, @TimestampConverter()  DateTime? updatedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String uid,  String firstName,  String lastName,  String? photoUrl, @NullableTimestampConverter()  DateTime? dob, @JsonKey(unknownEnumValue: Sex.male)  Sex sex,  double heightCm,  double weightKg,  List<FitnessGoal> goals,  ExperienceLevel experienceLevel,  List<String> injuries,  List<Equipment> equipment,  int weeklySessions,  String locale,  AppThemeMode themeMode,  bool notificationsEnabled,  bool onboardingComplete, @TimestampConverter()  DateTime? createdAt, @TimestampConverter()  DateTime? updatedAt)  $default,) {final _that = this;
 switch (_that) {
 case _UserProfile():
 return $default(_that.uid,_that.firstName,_that.lastName,_that.photoUrl,_that.dob,_that.sex,_that.heightCm,_that.weightKg,_that.goals,_that.experienceLevel,_that.injuries,_that.equipment,_that.weeklySessions,_that.locale,_that.themeMode,_that.notificationsEnabled,_that.onboardingComplete,_that.createdAt,_that.updatedAt);case _:
@@ -212,7 +212,7 @@ return $default(_that.uid,_that.firstName,_that.lastName,_that.photoUrl,_that.do
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String uid,  String firstName,  String lastName,  String? photoUrl, @NullableTimestampConverter()  DateTime? dob,  Sex sex,  double heightCm,  double weightKg,  List<FitnessGoal> goals,  ExperienceLevel experienceLevel,  List<String> injuries,  List<Equipment> equipment,  int weeklySessions,  String locale,  AppThemeMode themeMode,  bool notificationsEnabled,  bool onboardingComplete, @TimestampConverter()  DateTime? createdAt, @TimestampConverter()  DateTime? updatedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String uid,  String firstName,  String lastName,  String? photoUrl, @NullableTimestampConverter()  DateTime? dob, @JsonKey(unknownEnumValue: Sex.male)  Sex sex,  double heightCm,  double weightKg,  List<FitnessGoal> goals,  ExperienceLevel experienceLevel,  List<String> injuries,  List<Equipment> equipment,  int weeklySessions,  String locale,  AppThemeMode themeMode,  bool notificationsEnabled,  bool onboardingComplete, @TimestampConverter()  DateTime? createdAt, @TimestampConverter()  DateTime? updatedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _UserProfile() when $default != null:
 return $default(_that.uid,_that.firstName,_that.lastName,_that.photoUrl,_that.dob,_that.sex,_that.heightCm,_that.weightKg,_that.goals,_that.experienceLevel,_that.injuries,_that.equipment,_that.weeklySessions,_that.locale,_that.themeMode,_that.notificationsEnabled,_that.onboardingComplete,_that.createdAt,_that.updatedAt);case _:
@@ -227,7 +227,7 @@ return $default(_that.uid,_that.firstName,_that.lastName,_that.photoUrl,_that.do
 @JsonSerializable()
 
 class _UserProfile implements UserProfile {
-  const _UserProfile({required this.uid, this.firstName = '', this.lastName = '', this.photoUrl, @NullableTimestampConverter() this.dob, this.sex = Sex.other, this.heightCm = 0, this.weightKg = 0, final  List<FitnessGoal> goals = const <FitnessGoal>[], this.experienceLevel = ExperienceLevel.beginner, final  List<String> injuries = const <String>[], final  List<Equipment> equipment = const <Equipment>[], this.weeklySessions = 3, this.locale = 'en', this.themeMode = AppThemeMode.system, this.notificationsEnabled = true, this.onboardingComplete = false, @TimestampConverter() this.createdAt, @TimestampConverter() this.updatedAt}): _goals = goals,_injuries = injuries,_equipment = equipment;
+  const _UserProfile({required this.uid, this.firstName = '', this.lastName = '', this.photoUrl, @NullableTimestampConverter() this.dob, @JsonKey(unknownEnumValue: Sex.male) this.sex = Sex.male, this.heightCm = 0, this.weightKg = 0, final  List<FitnessGoal> goals = const <FitnessGoal>[], this.experienceLevel = ExperienceLevel.beginner, final  List<String> injuries = const <String>[], final  List<Equipment> equipment = const <Equipment>[], this.weeklySessions = 3, this.locale = 'en', this.themeMode = AppThemeMode.system, this.notificationsEnabled = true, this.onboardingComplete = false, @TimestampConverter() this.createdAt, @TimestampConverter() this.updatedAt}): _goals = goals,_injuries = injuries,_equipment = equipment;
   factory _UserProfile.fromJson(Map<String, dynamic> json) => _$UserProfileFromJson(json);
 
 @override final  String uid;
@@ -235,7 +235,7 @@ class _UserProfile implements UserProfile {
 @override@JsonKey() final  String lastName;
 @override final  String? photoUrl;
 @override@NullableTimestampConverter() final  DateTime? dob;
-@override@JsonKey() final  Sex sex;
+@override@JsonKey(unknownEnumValue: Sex.male) final  Sex sex;
 @override@JsonKey() final  double heightCm;
 @override@JsonKey() final  double weightKg;
  final  List<FitnessGoal> _goals;
@@ -301,7 +301,7 @@ abstract mixin class _$UserProfileCopyWith<$Res> implements $UserProfileCopyWith
   factory _$UserProfileCopyWith(_UserProfile value, $Res Function(_UserProfile) _then) = __$UserProfileCopyWithImpl;
 @override @useResult
 $Res call({
- String uid, String firstName, String lastName, String? photoUrl,@NullableTimestampConverter() DateTime? dob, Sex sex, double heightCm, double weightKg, List<FitnessGoal> goals, ExperienceLevel experienceLevel, List<String> injuries, List<Equipment> equipment, int weeklySessions, String locale, AppThemeMode themeMode, bool notificationsEnabled, bool onboardingComplete,@TimestampConverter() DateTime? createdAt,@TimestampConverter() DateTime? updatedAt
+ String uid, String firstName, String lastName, String? photoUrl,@NullableTimestampConverter() DateTime? dob,@JsonKey(unknownEnumValue: Sex.male) Sex sex, double heightCm, double weightKg, List<FitnessGoal> goals, ExperienceLevel experienceLevel, List<String> injuries, List<Equipment> equipment, int weeklySessions, String locale, AppThemeMode themeMode, bool notificationsEnabled, bool onboardingComplete,@TimestampConverter() DateTime? createdAt,@TimestampConverter() DateTime? updatedAt
 });
 
 

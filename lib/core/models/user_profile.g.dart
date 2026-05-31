@@ -12,7 +12,9 @@ _UserProfile _$UserProfileFromJson(Map<String, dynamic> json) => _UserProfile(
   lastName: json['lastName'] as String? ?? '',
   photoUrl: json['photoUrl'] as String?,
   dob: const NullableTimestampConverter().fromJson(json['dob']),
-  sex: $enumDecodeNullable(_$SexEnumMap, json['sex']) ?? Sex.other,
+  sex:
+      $enumDecodeNullable(_$SexEnumMap, json['sex'], unknownValue: Sex.male) ??
+      Sex.male,
   heightCm: (json['heightCm'] as num?)?.toDouble() ?? 0,
   weightKg: (json['weightKg'] as num?)?.toDouble() ?? 0,
   goals:
@@ -72,11 +74,7 @@ Map<String, dynamic> _$UserProfileToJson(
   ),
 };
 
-const _$SexEnumMap = {
-  Sex.male: 'male',
-  Sex.female: 'female',
-  Sex.other: 'other',
-};
+const _$SexEnumMap = {Sex.male: 'male', Sex.female: 'female'};
 
 const _$FitnessGoalEnumMap = {
   FitnessGoal.loseFat: 'loseFat',

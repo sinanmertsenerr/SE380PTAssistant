@@ -230,7 +230,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
           const SizedBox(height: AppSpacing.sm),
           Wrap(
             spacing: AppSpacing.sm,
-            children: Sex.values.where((s) => s != Sex.other).map((s) {
+            children: Sex.values.map((s) {
               final selected = _sex == s;
               return ChoiceChip(
                 label: Text(_sexLabel(l10n, s)),
@@ -358,7 +358,6 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
   String _sexLabel(AppLocalizations l, Sex s) => switch (s) {
     Sex.male => l.onboarding_sexMale,
     Sex.female => l.onboarding_sexFemale,
-    Sex.other => l.onboarding_sexOther,
   };
 
   String _expLabel(AppLocalizations l, ExperienceLevel e) => switch (e) {

@@ -28,5 +28,4 @@ String experienceLabel(AppLocalizations l, ExperienceLevel x) => switch (x) {
 String sexLabel(AppLocalizations l, Sex s) => switch (s) {
   Sex.male => l.onboarding_sexMale,
   Sex.female => l.onboarding_sexFemale,
-  Sex.other => l.onboarding_sexOther,
 };

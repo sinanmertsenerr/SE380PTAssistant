@@ -5,7 +5,7 @@ import 'timestamp_converter.dart';
 part 'user_profile.freezed.dart';
 part 'user_profile.g.dart';
 
-enum Sex { male, female, other }
+enum Sex { male, female }
 
 enum ExperienceLevel { beginner, intermediate, advanced }
 
@@ -23,7 +23,7 @@ abstract class UserProfile with _$UserProfile {
     @Default('') String lastName,
     String? photoUrl,
     @NullableTimestampConverter() DateTime? dob,
-    @Default(Sex.other) Sex sex,
+    @JsonKey(unknownEnumValue: Sex.male) @Default(Sex.male) Sex sex,
     @Default(0) double heightCm,
     @Default(0) double weightKg,
     @Default(<FitnessGoal>[]) List<FitnessGoal> goals,
