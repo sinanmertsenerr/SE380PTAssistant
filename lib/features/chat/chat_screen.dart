@@ -26,6 +26,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   bool _busy = false;
   bool _cooling = false;
   bool _autoScroll = true;
+  bool _seededHistory = false;
   int _lastMsgCount = 0;
   int _cooldownSeconds = 0;
   Timer? _cooldownTimer;
@@ -64,9 +65,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 
   void _maybeShowProgramSnackbar(List<ChatMessage> messages) {
-    if (messages.isEmpty) return;
-    final l10n = AppLocalizations.of(context);
-    final messenger = ScaffoldMessenger.of(context);
+    if (messages.isEmpty) {
+      _seededHistory = true;
+      return;
+    }
+    String? newestProgramId;
     for (final m in messages) {
       if (m.role != ChatRole.tool) continue;
       if (m.id.isEmpty) continue;
@@ -74,16 +77,33 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       final programId = _programIdFromTool(m);
       if (programId == null) continue;
       _shownToolMsgIds.add(m.id);
-      messenger.showSnackBar(
+      newestProgramId = programId;
+    }
+    // First load of an existing conversation: mark prior programs as seen
+    // without notifying — only newly created programs trigger a snackbar.
+    if (!_seededHistory) {
+      _seededHistory = true;
+      return;
+    }
+    if (newestProgramId == null) return;
+    final programId = newestProgramId;
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
         SnackBar(
+          duration: const Duration(seconds: 5),
           content: Text(l10n.programs_addedFromChat),
           action: SnackBarAction(
             label: l10n.programs_openInPrograms,
-            onPressed: () => context.go('/programs/$programId'),
+            onPressed: () {
+              messenger.hideCurrentSnackBar();
+              context.go('/programs/$programId');
+            },
           ),
         ),
       );
-    }
   }
 
   static const _programHints = <String>[
