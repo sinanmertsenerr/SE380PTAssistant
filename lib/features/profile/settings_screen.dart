@@ -33,9 +33,15 @@ class SettingsScreen extends ConsumerWidget {
               value:
                   settings.locale?.languageCode ??
                   Localizations.localeOf(context).languageCode,
-              items: const [
-                DropdownMenuItem(value: 'tr', child: Text('Türkçe')),
-                DropdownMenuItem(value: 'en', child: Text('English')),
+              items: [
+                DropdownMenuItem(
+                  value: 'tr',
+                  child: Text(l10n.profile_languageTr),
+                ),
+                DropdownMenuItem(
+                  value: 'en',
+                  child: Text(l10n.profile_languageEn),
+                ),
               ],
               onChanged: (v) {
                 if (v == null) return;

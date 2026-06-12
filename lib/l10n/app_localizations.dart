@@ -980,6 +980,72 @@ abstract class AppLocalizations {
   /// **'{rest}s rest'**
   String programs_restMeta(int rest);
 
+  /// No description provided for @programs_copySuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'(copy)'**
+  String get programs_copySuffix;
+
+  /// No description provided for @programs_addDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Add day'**
+  String get programs_addDay;
+
+  /// No description provided for @programs_addExercise.
+  ///
+  /// In en, this message translates to:
+  /// **'Add exercise'**
+  String get programs_addExercise;
+
+  /// No description provided for @programs_exerciseLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Exercise'**
+  String get programs_exerciseLabel;
+
+  /// No description provided for @programs_setsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Sets'**
+  String get programs_setsLabel;
+
+  /// No description provided for @programs_repsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reps'**
+  String get programs_repsLabel;
+
+  /// No description provided for @programs_restLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Rest (s)'**
+  String get programs_restLabel;
+
+  /// No description provided for @programs_notesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get programs_notesLabel;
+
+  /// No description provided for @programs_addSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Add set'**
+  String get programs_addSet;
+
+  /// No description provided for @programs_kgLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'kg'**
+  String get programs_kgLabel;
+
+  /// No description provided for @programs_setsLogged.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{1 set logged} other{{n} sets logged}}'**
+  String programs_setsLogged(int n);
+
   /// No description provided for @chat_title.
   ///
   /// In en, this message translates to:
@@ -1297,6 +1363,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Change photo'**
   String get profile_editPhoto;
+
+  /// No description provided for @profile_cropTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Crop'**
+  String get profile_cropTitle;
 
   /// No description provided for @profile_settings.
   ///

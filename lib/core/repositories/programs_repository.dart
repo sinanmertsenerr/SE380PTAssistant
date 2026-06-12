@@ -87,11 +87,15 @@ class ProgramsRepository {
 
   Future<void> delete(String uid, String id) => _col(uid).doc(id).delete();
 
-  Future<String> duplicate(String uid, String id) async {
+  Future<String> duplicate(
+    String uid,
+    String id, {
+    required String copySuffix,
+  }) async {
     final original = await get(uid, id);
     final copy = original.copyWith(
       id: '',
-      title: '${original.title} (kopya)',
+      title: '${original.title} $copySuffix',
       isActive: false,
     );
     return create(uid, copy);

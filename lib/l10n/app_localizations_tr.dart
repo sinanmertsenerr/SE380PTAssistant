@@ -484,6 +484,46 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
+  String get programs_copySuffix => '(kopya)';
+
+  @override
+  String get programs_addDay => 'Gün ekle';
+
+  @override
+  String get programs_addExercise => 'Egzersiz ekle';
+
+  @override
+  String get programs_exerciseLabel => 'Egzersiz';
+
+  @override
+  String get programs_setsLabel => 'Set';
+
+  @override
+  String get programs_repsLabel => 'Tekrar';
+
+  @override
+  String get programs_restLabel => 'Dinlenme (sn)';
+
+  @override
+  String get programs_notesLabel => 'Notlar';
+
+  @override
+  String get programs_addSet => 'Set ekle';
+
+  @override
+  String get programs_kgLabel => 'kg';
+
+  @override
+  String programs_setsLogged(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n set kaydedildi',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get chat_title => 'AI';
 
   @override
@@ -653,6 +693,9 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get profile_editPhoto => 'Fotoğraf değiştir';
+
+  @override
+  String get profile_cropTitle => 'Kırp';
 
   @override
   String get profile_settings => 'Ayarlar';

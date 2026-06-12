@@ -19,16 +19,16 @@ void main() {
     expect((await repo.get('u1', id2)).isActive, true);
   });
 
-  test('duplicate clones a program inactive with kopya suffix', () async {
+  test('duplicate clones a program inactive with copy suffix', () async {
     final firestore = FakeFirebaseFirestore();
     final repo = ProgramsRepository(firestore);
     final id = await repo.create(
       'u1',
       const Program(id: '', title: 'Push', isActive: true),
     );
-    final copyId = await repo.duplicate('u1', id);
+    final copyId = await repo.duplicate('u1', id, copySuffix: '(kopya)');
     final copy = await repo.get('u1', copyId);
-    expect(copy.title.contains('kopya'), true);
+    expect(copy.title, 'Push (kopya)');
     expect(copy.isActive, false);
   });
 }

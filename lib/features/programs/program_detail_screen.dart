@@ -75,8 +75,13 @@ class _ProgramDetailScreenState extends ConsumerState<ProgramDetailScreen> {
           IconButton(
             icon: const Icon(Icons.copy_rounded),
             tooltip: l10n.programs_duplicate,
-            onPressed: () =>
-                ref.read(programsRepoProvider).duplicate(uid, widget.programId),
+            onPressed: () => ref
+                .read(programsRepoProvider)
+                .duplicate(
+                  uid,
+                  widget.programId,
+                  copySuffix: l10n.programs_copySuffix,
+                ),
           ),
           IconButton(
             icon: const Icon(Icons.delete_outline_rounded),

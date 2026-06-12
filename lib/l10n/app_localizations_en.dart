@@ -485,6 +485,47 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get programs_copySuffix => '(copy)';
+
+  @override
+  String get programs_addDay => 'Add day';
+
+  @override
+  String get programs_addExercise => 'Add exercise';
+
+  @override
+  String get programs_exerciseLabel => 'Exercise';
+
+  @override
+  String get programs_setsLabel => 'Sets';
+
+  @override
+  String get programs_repsLabel => 'Reps';
+
+  @override
+  String get programs_restLabel => 'Rest (s)';
+
+  @override
+  String get programs_notesLabel => 'Notes';
+
+  @override
+  String get programs_addSet => 'Add set';
+
+  @override
+  String get programs_kgLabel => 'kg';
+
+  @override
+  String programs_setsLogged(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n sets logged',
+      one: '1 set logged',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get chat_title => 'AI';
 
   @override
@@ -655,6 +696,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profile_editPhoto => 'Change photo';
+
+  @override
+  String get profile_cropTitle => 'Crop';
 
   @override
   String get profile_settings => 'Settings';

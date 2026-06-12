@@ -54,11 +54,12 @@ class _ProgramEditorScreenState extends ConsumerState<ProgramEditorScreen> {
   void _addDay() {
     final p = _program;
     if (p == null) return;
+    final l10n = AppLocalizations.of(context);
     setState(() {
       _program = p.copyWith(
         days: [
           ...p.days,
-          ProgramDay(name: 'Day ${p.days.length + 1}'),
+          ProgramDay(name: l10n.programs_dayLabel(p.days.length + 1)),
         ],
       );
       _dirty = true;
@@ -218,7 +219,7 @@ class _ProgramEditorScreenState extends ConsumerState<ProgramEditorScreen> {
             floatingActionButton: FloatingActionButton.extended(
               onPressed: _addDay,
               icon: const Icon(Icons.add_rounded),
-              label: const Text('Add day'),
+              label: Text(l10n.programs_addDay),
             ),
             body: ListView.builder(
               padding: const EdgeInsets.fromLTRB(
@@ -315,7 +316,7 @@ class _DayCard extends StatelessWidget {
           OutlinedButton.icon(
             onPressed: onAddExercise,
             icon: const Icon(Icons.add_rounded, size: 18),
-            label: const Text('Add exercise'),
+            label: Text(l10n.programs_addExercise),
           ),
         ],
       ),
@@ -443,7 +444,7 @@ class _ExerciseSheetState extends State<_ExerciseSheet> {
           TextField(
             controller: _name,
             autofocus: widget.initial == null,
-            decoration: const InputDecoration(labelText: 'Exercise'),
+            decoration: InputDecoration(labelText: l10n.programs_exerciseLabel),
           ),
           const SizedBox(height: AppSpacing.md),
           Row(
@@ -452,14 +453,18 @@ class _ExerciseSheetState extends State<_ExerciseSheet> {
                 child: TextField(
                   controller: _sets,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(labelText: 'Sets'),
+                  decoration: InputDecoration(
+                    labelText: l10n.programs_setsLabel,
+                  ),
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: TextField(
                   controller: _reps,
-                  decoration: const InputDecoration(labelText: 'Reps'),
+                  decoration: InputDecoration(
+                    labelText: l10n.programs_repsLabel,
+                  ),
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
@@ -467,7 +472,9 @@ class _ExerciseSheetState extends State<_ExerciseSheet> {
                 child: TextField(
                   controller: _rest,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(labelText: 'Rest (sn)'),
+                  decoration: InputDecoration(
+                    labelText: l10n.programs_restLabel,
+                  ),
                 ),
               ),
             ],
@@ -475,7 +482,7 @@ class _ExerciseSheetState extends State<_ExerciseSheet> {
           const SizedBox(height: AppSpacing.md),
           TextField(
             controller: _notes,
-            decoration: const InputDecoration(labelText: 'Notes'),
+            decoration: InputDecoration(labelText: l10n.programs_notesLabel),
             maxLines: 2,
           ),
           const SizedBox(height: AppSpacing.lg),

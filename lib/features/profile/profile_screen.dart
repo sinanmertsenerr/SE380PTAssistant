@@ -111,12 +111,12 @@ class _ProfileHero extends ConsumerWidget {
       compressQuality: 85,
       uiSettings: [
         AndroidUiSettings(
-          toolbarTitle: 'Crop',
+          toolbarTitle: l10n.profile_cropTitle,
           lockAspectRatio: true,
           aspectRatioPresets: [CropAspectRatioPreset.square],
         ),
         IOSUiSettings(
-          title: 'Crop',
+          title: l10n.profile_cropTitle,
           aspectRatioLockEnabled: true,
           aspectRatioPresets: [CropAspectRatioPreset.square],
         ),

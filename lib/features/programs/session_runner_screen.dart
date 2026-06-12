@@ -77,7 +77,9 @@ class _SessionRunnerScreenState extends ConsumerState<SessionRunnerScreen> {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('${logged.length} set kaydedildi'),
+          content: Text(
+            AppLocalizations.of(context).programs_setsLogged(logged.length),
+          ),
         ),
       );
       context.go('/home');
@@ -188,8 +190,8 @@ class _SessionRunnerScreenState extends ConsumerState<SessionRunnerScreen> {
                                     const TextInputType.numberWithOptions(
                                       decimal: true,
                                     ),
-                                decoration: const InputDecoration(
-                                  labelText: 'kg',
+                                decoration: InputDecoration(
+                                  labelText: l10n.programs_kgLabel,
                                   isDense: true,
                                 ),
                                 onChanged: (v) => entries[s].kg = v,
@@ -199,8 +201,8 @@ class _SessionRunnerScreenState extends ConsumerState<SessionRunnerScreen> {
                             Expanded(
                               child: TextField(
                                 keyboardType: TextInputType.number,
-                                decoration: const InputDecoration(
-                                  labelText: 'reps',
+                                decoration: InputDecoration(
+                                  labelText: l10n.programs_repsLabel,
                                   isDense: true,
                                 ),
                                 onChanged: (v) => entries[s].reps = v,
@@ -216,7 +218,7 @@ class _SessionRunnerScreenState extends ConsumerState<SessionRunnerScreen> {
                           () => entries.add(_SetEntry(reps: '', kg: '')),
                         ),
                         icon: const Icon(Icons.add_rounded, size: 16),
-                        label: const Text('Set ekle'),
+                        label: Text(l10n.programs_addSet),
                       ),
                     ),
                   ],
