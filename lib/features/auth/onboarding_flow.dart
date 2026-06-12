@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../core/models/user_profile.dart';
 import '../../core/providers/providers.dart';
@@ -220,7 +221,11 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
             child: InputDecorator(
               decoration: InputDecoration(labelText: l10n.onboarding_dob),
               child: Text(
-                _dob == null ? '—' : _dob!.toIso8601String().split('T').first,
+                _dob == null
+                    ? '—'
+                    : DateFormat.yMd(
+                        Localizations.localeOf(context).toLanguageTag(),
+                      ).format(_dob!),
                 style: theme.textTheme.bodyLarge,
               ),
             ),

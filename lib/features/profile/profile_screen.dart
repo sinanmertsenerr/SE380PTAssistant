@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 
 import '../../core/models/user_profile.dart';
 import '../../core/providers/providers.dart';
@@ -258,15 +259,16 @@ class _MetricsCard extends ConsumerWidget {
     double initial,
   ) async {
     final l10n = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context).toLanguageTag();
     final raw = await showAppPrompt(
       context,
       title: label,
-      initial: initial == 0 ? '' : initial.toString(),
+      initial: initial == 0 ? '' : NumberFormat.decimalPattern(locale).format(initial),
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       saveLabel: l10n.common_save,
     );
     if (raw == null) return;
-    final v = double.tryParse(raw);
+    final v = double.tryParse(raw.trim().replaceAll(',', '.'));
     if (v == null) return;
     final uid = ref.read(currentUidProvider);
     if (uid == null) return;
@@ -276,6 +278,7 @@ class _MetricsCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context).toLanguageTag();
     return AppSectionCard(
       eyebrow: l10n.profile_metricsTitle,
       child: Column(
@@ -294,7 +297,10 @@ class _MetricsCard extends ConsumerWidget {
           ),
           _MetricRow(
             label: l10n.onboarding_weight,
-            value: profile.weightKg.toStringAsFixed(1),
+            value: NumberFormat.decimalPatternDigits(
+              locale: locale,
+              decimalDigits: 1,
+            ).format(profile.weightKg),
             unit: l10n.profile_metricKg,
             onTap: () => _editNumber(
               context,
