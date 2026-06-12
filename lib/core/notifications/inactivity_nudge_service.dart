@@ -11,9 +11,14 @@ class InactivityNudgeService {
 
   final LocalNotificationsService _notifications;
 
+  /// TEST SWITCH: set to true and the nudges fire 30/60/90 SECONDS from now
+  /// instead of 3/5/7 days at 19:00. Set back to false before shipping.
+  static const testMode = true;
+
   // Reserved id range; reminder notifications use Firestore-id hashes.
   static const _ids = [910001, 910002, 910003];
   static const _days = [3, 5, 7];
+  static const _testSeconds = [30, 60, 90];
   static const _fireHour = 19;
 
   static const _titles = {
@@ -46,7 +51,9 @@ class InactivityNudgeService {
         id: _ids[i],
         title: title,
         body: bodies[i],
-        when: today7pm.add(Duration(days: _days[i])),
+        when: testMode
+            ? now.add(Duration(seconds: _testSeconds[i]))
+            : today7pm.add(Duration(days: _days[i])),
       );
     }
   }
