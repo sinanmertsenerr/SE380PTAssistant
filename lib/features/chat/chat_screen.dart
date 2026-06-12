@@ -257,6 +257,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final uid = ref.watch(currentUidProvider);
     if (uid == null) return const SizedBox.shrink();
     final asyncMessages = ref.watch(_messagesProvider(uid));
+    final streamingText = ref.watch(streamingReplyProvider) ?? '';
+    final hasStreamingBubble = streamingText.isNotEmpty;
+    ref.listen<String?>(streamingReplyProvider, (_, next) {
+      if (next == null || next.isEmpty || !_autoScroll) return;
+      WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToEnd());
+    });
 
     return Scaffold(
       body: SafeArea(
@@ -286,8 +292,19 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       AppSpacing.md,
                       AppSpacing.sm,
                     ),
-                    itemCount: messages.length,
+                    itemCount: messages.length + (hasStreamingBubble ? 1 : 0),
                     itemBuilder: (_, i) {
+                      if (i == messages.length) {
+                        return _MessageBubble(
+                          message: ChatMessage(
+                            id: '',
+                            role: ChatRole.model,
+                            content: streamingText,
+                          ),
+                          showAiAvatar: messages.isEmpty ||
+                              messages.last.role != ChatRole.model,
+                        );
+                      }
                       final m = messages[i];
                       final showAvatar =
                           m.role == ChatRole.model &&
@@ -311,7 +328,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 },
               ),
             ),
-            if (_busy)
+            if (_busy && !hasStreamingBubble)
               _ThinkingIndicator(label: l10n.chat_thinking)
             else if (_cooling)
               _CooldownIndicator(

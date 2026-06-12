@@ -121,6 +121,8 @@ class AiService {
     required AiContext context,
     required List<ChatMessage> history,
     GuardrailResult? precomputedGuard,
+    void Function(String delta)? onTextDelta,
+    Future<void> Function(ToolEvent event)? onToolEvent,
   }) async {
     final guard =
         precomputedGuard ??
@@ -150,9 +152,8 @@ class AiService {
       ];
 
       var iterations = 0;
-      var response = await _chatModel.generateContent(contents);
-      final firstContent = response.candidates.firstOrNull?.content;
-      if (firstContent == null) {
+      var turn = await _streamTurn(contents, onTextDelta);
+      if (turn == null) {
         debugPrint(
           'AI sendMessage: empty candidates on initial response (likely safety block)',
         );
@@ -163,29 +164,28 @@ class AiService {
           error: AiTurnError.safetyBlocked,
         );
       }
-      contents.add(firstContent);
+      contents.add(_turnToContent(turn));
 
-      while (response.functionCalls.isNotEmpty && iterations < 5) {
+      while (turn!.calls.isNotEmpty && iterations < 5) {
         iterations++;
         final responses = <FunctionResponse>[];
-        for (final call in response.functionCalls) {
+        for (final call in turn.calls) {
           final result = await _toolRegistry.dispatch(
             call.name,
             call.args.cast<String, Object?>(),
           );
-          events.add(
-            ToolEvent(
-              name: call.name,
-              args: call.args.cast<String, Object?>(),
-              result: result,
-            ),
+          final event = ToolEvent(
+            name: call.name,
+            args: call.args.cast<String, Object?>(),
+            result: result,
           );
+          events.add(event);
+          await onToolEvent?.call(event);
           responses.add(FunctionResponse(call.name, result));
         }
         contents.add(Content.functionResponses(responses));
-        response = await _chatModel.generateContent(contents);
-        final nextContent = response.candidates.firstOrNull?.content;
-        if (nextContent == null) {
+        turn = await _streamTurn(contents, onTextDelta);
+        if (turn == null) {
           debugPrint(
             'AI sendMessage: empty candidates after tool iteration $iterations '
             '(likely safety block)',
@@ -197,10 +197,10 @@ class AiService {
             error: AiTurnError.safetyBlocked,
           );
         }
-        contents.add(nextContent);
+        contents.add(_turnToContent(turn));
       }
 
-      final text = response.text?.trim() ?? '';
+      final text = turn.text.trim();
       if (text.isEmpty) {
         final reason = iterations >= 5
             ? AiTurnError.toolLoopExhausted
@@ -241,6 +241,41 @@ class AiService {
         retryAfter: retry,
       );
     }
+  }
+
+  /// Runs one streamed model turn, forwarding text deltas as they arrive.
+  /// Returns the aggregated text and function calls, or null when the stream
+  /// yields no candidate content at all (safety block).
+  Future<({String text, List<FunctionCall> calls})?> _streamTurn(
+    List<Content> contents,
+    void Function(String delta)? onTextDelta,
+  ) async {
+    final buffer = StringBuffer();
+    final calls = <FunctionCall>[];
+    var sawContent = false;
+    await for (final chunk in _chatModel.generateContentStream(contents)) {
+      final content = chunk.candidates.firstOrNull?.content;
+      if (content == null) continue;
+      sawContent = true;
+      for (final part in content.parts) {
+        if (part.isThought ?? false) continue;
+        if (part is TextPart) {
+          buffer.write(part.text);
+          onTextDelta?.call(part.text);
+        } else if (part is FunctionCall) {
+          calls.add(part);
+        }
+      }
+    }
+    if (!sawContent) return null;
+    return (text: buffer.toString(), calls: calls);
+  }
+
+  Content _turnToContent(({String text, List<FunctionCall> calls}) turn) {
+    return Content.model([
+      if (turn.text.isNotEmpty) TextPart(turn.text),
+      ...turn.calls,
+    ]);
   }
 
   Future<String> generateOpeningSummary({

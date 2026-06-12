@@ -7,6 +7,24 @@ import '../../core/providers/providers.dart';
 import '../../core/repositories/chat_repository.dart';
 import '../../l10n/app_localizations.dart';
 
+/// In-flight assistant reply, streamed token-by-token. Null when idle;
+/// empty while waiting for the first token of the current turn.
+class StreamingReplyNotifier extends Notifier<String?> {
+  @override
+  String? build() => null;
+
+  void start() => state = '';
+
+  void append(String delta) => state = (state ?? '') + delta;
+
+  void clear() => state = null;
+}
+
+final streamingReplyProvider =
+    NotifierProvider<StreamingReplyNotifier, String?>(
+      StreamingReplyNotifier.new,
+    );
+
 class ChatController {
   ChatController(this._ref);
 
@@ -52,6 +70,7 @@ class ChatController {
       final activeProgram = await programFuture;
       final notes = await notesFuture;
 
+      final streaming = _ref.read(streamingReplyProvider.notifier)..start();
       final result = await ai.sendMessage(
         userMessage: text,
         context: AiContext(
@@ -62,6 +81,26 @@ class ChatController {
         ),
         history: priorHistory,
         precomputedGuard: guard,
+        onTextDelta: (delta) {
+          if (_ref.read(currentUidProvider) != uid) return;
+          streaming.append(delta);
+        },
+        onToolEvent: (event) async {
+          if (_ref.read(currentUidProvider) != uid) return;
+          // Tool cards land in Firestore before the final text, so the
+          // streamed bubble resets and resumes below them.
+          streaming.start();
+          await chatRepo.append(
+            uid,
+            ChatMessage(
+              id: '',
+              role: ChatRole.tool,
+              toolName: event.name,
+              toolArgs: event.args,
+              toolResult: event.result,
+            ),
+          );
+        },
       );
 
       if (_ref.read(currentUidProvider) != uid) {
@@ -82,19 +121,6 @@ class ChatController {
           ),
         );
         return null;
-      }
-
-      for (final event in result.toolEvents) {
-        await chatRepo.append(
-          uid,
-          ChatMessage(
-            id: '',
-            role: ChatRole.tool,
-            toolName: event.name,
-            toolArgs: event.args,
-            toolResult: event.result,
-          ),
-        );
       }
 
       if (result.retryAfter != null) {
@@ -138,6 +164,8 @@ class ChatController {
         debugPrint('sendUserMessage: fallback persist failed: $e2\n$st2');
       }
       return null;
+    } finally {
+      _ref.read(streamingReplyProvider.notifier).clear();
     }
   }
 
