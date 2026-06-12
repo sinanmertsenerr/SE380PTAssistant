@@ -8,6 +8,7 @@ import '../ai/daily_nudge_service.dart';
 import '../ai/tool_registry.dart';
 import '../models/user_profile.dart';
 import '../notifications/fcm_service.dart';
+import '../notifications/inactivity_nudge_service.dart';
 import '../notifications/local_notifications.dart';
 import '../repositories/chat_repository.dart';
 import '../repositories/notes_repository.dart';
@@ -71,6 +72,10 @@ final profileStreamProvider = StreamProvider<UserProfile?>((ref) {
 
 final localNotificationsProvider = Provider<LocalNotificationsService>(
   (ref) => LocalNotificationsService(),
+);
+
+final inactivityNudgeProvider = Provider<InactivityNudgeService>(
+  (ref) => InactivityNudgeService(ref.watch(localNotificationsProvider)),
 );
 
 final fcmServiceProvider = Provider<FcmService>(
