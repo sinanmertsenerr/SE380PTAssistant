@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:math' as math;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -9,15 +12,71 @@ import '../../l10n/app_localizations.dart';
 
 /// In-flight assistant reply, streamed token-by-token. Null when idle;
 /// empty while waiting for the first token of the current turn.
+///
+/// Incoming deltas land in a pending buffer and are revealed a few characters
+/// per tick, so bursty network chunks read as a smooth typewriter flow. The
+/// reveal rate scales with the backlog, keeping the bubble at most a few
+/// hundred milliseconds behind the model.
 class StreamingReplyNotifier extends Notifier<String?> {
+  static const _tick = Duration(milliseconds: 30);
+
+  Timer? _timer;
+  String _pending = '';
+  Completer<void>? _drained;
+
   @override
-  String? build() => null;
+  String? build() {
+    ref.onDispose(_reset);
+    return null;
+  }
 
-  void start() => state = '';
+  void start() {
+    _reset();
+    state = '';
+  }
 
-  void append(String delta) => state = (state ?? '') + delta;
+  void append(String delta) {
+    _pending += delta;
+    _timer ??= Timer.periodic(_tick, (_) => _reveal());
+  }
 
-  void clear() => state = null;
+  /// Completes once every buffered character has been revealed, so the final
+  /// persisted message never visibly jumps ahead of the animation.
+  Future<void> drain() {
+    if (_pending.isEmpty && _timer == null) return Future.value();
+    _drained ??= Completer<void>();
+    return _drained!.future;
+  }
+
+  void clear() {
+    _reset();
+    state = null;
+  }
+
+  void _reveal() {
+    if (_pending.isEmpty) {
+      _stopTimer();
+      return;
+    }
+    final take = math.min(
+      _pending.length,
+      math.max(2, _pending.length ~/ 12),
+    );
+    state = (state ?? '') + _pending.substring(0, take);
+    _pending = _pending.substring(take);
+  }
+
+  void _reset() {
+    _pending = '';
+    _stopTimer();
+  }
+
+  void _stopTimer() {
+    _timer?.cancel();
+    _timer = null;
+    _drained?.complete();
+    _drained = null;
+  }
 }
 
 final streamingReplyProvider =
@@ -144,6 +203,7 @@ class ChatController {
           ? '${result.text}\n\n${l10n.chat_disclaimerInjury}'
           : result.text;
 
+      await streaming.drain();
       await chatRepo.append(
         uid,
         ChatMessage(id: '', role: ChatRole.model, content: body),

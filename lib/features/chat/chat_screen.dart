@@ -261,7 +261,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final hasStreamingBubble = streamingText.isNotEmpty;
     ref.listen<String?>(streamingReplyProvider, (_, next) {
       if (next == null || next.isEmpty || !_autoScroll) return;
-      WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToEnd());
+      // jumpTo instead of animateTo: deltas arrive every ~30ms and restarting
+      // a 200ms scroll animation per delta reads as stutter.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!_scroll.hasClients) return;
+        _scroll.jumpTo(_scroll.position.maxScrollExtent);
+      });
     });
 
     return Scaffold(
