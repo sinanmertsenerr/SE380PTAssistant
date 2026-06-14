@@ -187,13 +187,23 @@ class ChatController {
         return result.retryAfter;
       }
 
+      final savedProgram = result.toolEvents.any(
+        (e) =>
+            (e.name == 'createProgram' || e.name == 'updateProgram') &&
+            e.result['ok'] == true,
+      );
+
       if (result.error != null || result.text.isEmpty) {
+        // A program tool that actually succeeded must not read as a failure
+        // just because the model returned no closing prose after the call.
         await chatRepo.append(
           uid,
           ChatMessage(
             id: '',
             role: ChatRole.model,
-            content: l10n.chat_errorGeneric,
+            content: savedProgram
+                ? l10n.programs_addedFromChat
+                : l10n.chat_errorGeneric,
           ),
         );
         return null;

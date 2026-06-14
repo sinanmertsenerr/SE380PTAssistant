@@ -1229,7 +1229,7 @@ abstract class AppLocalizations {
   /// No description provided for @chat_importProgramInstruction.
   ///
   /// In en, this message translates to:
-  /// **'Save the program above ({title}) to my Programs using createProgram. Tool call only — no extra prose.'**
+  /// **'Add the full program above ({title}) to my programs, with all its days and exercises, and tell me when it is saved.'**
   String chat_importProgramInstruction(String title);
 
   /// No description provided for @notes_title.

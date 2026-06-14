@@ -622,7 +622,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String chat_importProgramInstruction(String title) {
-    return 'Yukarıdaki programı ($title) createProgram aracıyla Programlarıma ekle. Sadece tool çağrısı yap, ek metin yazma.';
+    return 'Yukarıdaki programın tamamını ($title) tüm günleri ve egzersizleriyle programlarıma ekle ve kaydedince bana söyle.';
   }
 
   @override

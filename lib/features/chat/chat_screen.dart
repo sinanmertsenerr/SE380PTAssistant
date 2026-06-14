@@ -7,6 +7,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/models/chat_message.dart';
+import '../../core/models/exercise.dart';
+import '../../core/models/program.dart';
 import '../../core/providers/providers.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
@@ -32,6 +34,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   Timer? _cooldownTimer;
   final Set<String> _shownToolMsgIds = <String>{};
   final Set<String> _importInFlight = <String>{};
+  final Set<String> _importedMsgIds = <String>{};
 
   @override
   void initState() {
@@ -181,19 +184,191 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     return flat.length > 60 ? flat.substring(0, 60) : flat;
   }
 
+  /// Imports the program straight from the chat text into Firestore, with no
+  /// AI round-trip: the program is already written out above, so we parse it
+  /// locally and save it. Zero model calls, and the safety classifier cannot
+  /// block it.
   Future<void> _importProgram(ChatMessage message) async {
-    if (_busy || _cooling) return;
     if (message.id.isEmpty) return;
     if (_importInFlight.contains(message.id)) return;
+    final uid = ref.read(currentUidProvider);
+    if (uid == null) return;
     final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final router = GoRouter.of(context);
+
     final title = _extractProgramTitle(message.content);
-    final instruction = l10n.chat_importProgramInstruction(title);
+    final program = _parseProgram(message.content, title);
     setState(() => _importInFlight.add(message.id));
     try {
-      await _send(instruction);
+      if (program == null) {
+        messenger
+          ..hideCurrentSnackBar()
+          ..showSnackBar(SnackBar(content: Text(l10n.chat_errorGeneric)));
+        return;
+      }
+      final id = await ref
+          .read(programsRepoProvider)
+          .create(uid, program.copyWith(originChatMessageId: message.id));
+      if (!mounted) return;
+      setState(() => _importedMsgIds.add(message.id));
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            duration: const Duration(seconds: 5),
+            content: Text(l10n.programs_addedFromChat),
+            action: SnackBarAction(
+              label: l10n.programs_openInPrograms,
+              onPressed: () {
+                messenger.hideCurrentSnackBar();
+                router.go('/programs/$id');
+              },
+            ),
+          ),
+        );
+    } catch (e, st) {
+      debugPrint('local program import failed: $e\n$st');
+      if (mounted) {
+        messenger
+          ..hideCurrentSnackBar()
+          ..showSnackBar(SnackBar(content: Text(l10n.chat_errorGeneric)));
+      }
     } finally {
       if (mounted) setState(() => _importInFlight.remove(message.id));
     }
+  }
+
+  /// Best-effort parse of an AI program reply (markdown) into a [Program].
+  /// Days come from headings / bold / "Day N" lines, exercises from list rows.
+  /// Unrecognized fields fall back to sensible defaults so the user only has to
+  /// fine-tune in the editor. Returns null when no exercises are found.
+  Program? _parseProgram(String content, String fallbackTitle) {
+    final days = <ProgramDay>[];
+    var exercises = <Exercise>[];
+    String? dayName;
+
+    void flush() {
+      if (exercises.isEmpty) return;
+      days.add(
+        ProgramDay(
+          name: (dayName == null || dayName.trim().isEmpty)
+              ? 'Day ${days.length + 1}'
+              : dayName,
+          exercises: List.of(exercises.take(15)),
+        ),
+      );
+      exercises = [];
+    }
+
+    for (final raw in content.split('\n')) {
+      if (raw.trim().isEmpty) continue;
+      final ex = _parseExerciseLine(raw);
+      if (ex != null) {
+        exercises.add(ex);
+        continue;
+      }
+      final header = _dayHeader(raw);
+      if (header != null) {
+        flush();
+        dayName = header;
+      }
+    }
+    flush();
+    if (days.isEmpty) return null;
+    return Program(
+      id: '',
+      title: fallbackTitle.isEmpty ? 'AI Program' : fallbackTitle,
+      source: ProgramSource.ai,
+      days: List.of(days.take(8)),
+    );
+  }
+
+  String? _dayHeader(String line) {
+    final original = line.trim();
+    var s = original.replaceAll(RegExp('[*_`]'), '').trim();
+    final heading = RegExp(r'^#{1,6}\s*(.+)$').firstMatch(s);
+    if (heading != null) s = heading.group(1)!.trim();
+    s = s.replaceAll(RegExp(r':$'), '').trim();
+    if (s.isEmpty) return null;
+    final isDayWord = RegExp(
+      r'^(day|g[üu]n)\b',
+      caseSensitive: false,
+    ).hasMatch(s);
+    final isBold = RegExp(r'^\*\*.+\*\*:?$').hasMatch(original);
+    if (heading != null || isBold || isDayWord) {
+      return s.length > 50 ? s.substring(0, 50).trim() : s;
+    }
+    return null;
+  }
+
+  Exercise? _parseExerciseLine(String raw) {
+    final hadMarker = RegExp(r'^\s*([-*•]|\d+[.)])\s+').hasMatch(raw);
+    final s = raw
+        .replaceFirst(RegExp(r'^\s*([-*•]|\d+[.)])\s+'), '')
+        .replaceAll(RegExp('[*_`#]'), '')
+        .trim();
+    if (s.isEmpty) return null;
+
+    var sets = 3;
+    var reps = '8-12';
+    var found = false;
+
+    final sr = RegExp(
+      r'(\d+)\s*(?:sets?\s*)?(?:x|×|of)\s*(\d+(?:\s*[-–]\s*\d+)?)',
+      caseSensitive: false,
+    ).firstMatch(s);
+    if (sr != null) {
+      sets = int.tryParse(sr.group(1)!) ?? 3;
+      reps = sr.group(2)!.replaceAll(RegExp(r'\s+'), '').replaceAll('–', '-');
+      found = true;
+    } else {
+      final setsM = RegExp(
+        r'(\d+)\s*sets?\b',
+        caseSensitive: false,
+      ).firstMatch(s);
+      final repsM =
+          RegExp(
+            r'(\d+(?:\s*[-–]\s*\d+)?)\s*reps?\b',
+            caseSensitive: false,
+          ).firstMatch(s) ??
+          RegExp(
+            r'reps?\s*[:=]?\s*(\d+(?:\s*[-–]\s*\d+)?)',
+            caseSensitive: false,
+          ).firstMatch(s);
+      if (setsM != null) {
+        sets = int.tryParse(setsM.group(1)!) ?? 3;
+        found = true;
+      }
+      if (repsM != null) {
+        reps = repsM.group(1)!.replaceAll(RegExp(r'\s+'), '').replaceAll('–', '-');
+        found = true;
+      }
+    }
+
+    if (!hadMarker && !found) return null;
+
+    var restSec = 90;
+    final restM = RegExp(
+      r'(\d+)\s*(?:sec|secs|seconds|sn|saniye|s)\b',
+      caseSensitive: false,
+    ).firstMatch(s);
+    if (restM != null) restSec = int.tryParse(restM.group(1)!) ?? 90;
+
+    var name = s;
+    final specCut = RegExp(
+      r'[\(:,\-]?\s*\d+\s*(?:x|×|sets?|reps?|sec|sn|s\b)',
+      caseSensitive: false,
+    ).firstMatch(s);
+    if (specCut != null && specCut.start > 0) {
+      name = s.substring(0, specCut.start);
+    }
+    name = name.replaceAll(RegExp(r'[\-:–—,(]+\s*$'), '').trim();
+    if (name.isEmpty) name = s.trim();
+    if (name.length > 70) name = name.substring(0, 70).trim();
+    if (name.isEmpty) return null;
+
+    return Exercise(name: name, sets: sets, reps: reps, restSec: restSec);
   }
 
   Future<void> _send([String? overrideText]) async {
@@ -318,6 +493,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                           m.role == ChatRole.model &&
                           m.id.isNotEmpty &&
                           _looksLikeProgram(m.content) &&
+                          !_importedMsgIds.contains(m.id) &&
                           !_alreadySavedAsProgram(messages, i);
                       return _MessageBubble(
                         message: m,
@@ -326,7 +502,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                             ? () => _importProgram(m)
                             : null,
                         importing: _importInFlight.contains(m.id),
-                        importDisabled: _busy || _cooling,
+                        importDisabled: false,
                       );
                     },
                   );

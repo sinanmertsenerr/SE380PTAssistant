@@ -625,7 +625,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String chat_importProgramInstruction(String title) {
-    return 'Save the program above ($title) to my Programs using createProgram. Tool call only — no extra prose.';
+    return 'Add the full program above ($title) to my programs, with all its days and exercises, and tell me when it is saved.';
   }
 
   @override

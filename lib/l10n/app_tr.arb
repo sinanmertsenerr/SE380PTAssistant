@@ -206,7 +206,7 @@
   "chat_attachLabel": "Ekle",
   "chat_importProgram": "Programlarıma ekle",
   "chat_importingProgram": "Programa kaydediliyor…",
-  "chat_importProgramInstruction": "Yukarıdaki programı ({title}) createProgram aracıyla Programlarıma ekle. Sadece tool çağrısı yap, ek metin yazma.",
+  "chat_importProgramInstruction": "Yukarıdaki programın tamamını ({title}) tüm günleri ve egzersizleriyle programlarıma ekle ve kaydedince bana söyle.",
   "@chat_importProgramInstruction": {"placeholders": {"title": {"type": "String"}}},
   "notes_title": "Notlar",
   "notes_search": "Notlarda ara",

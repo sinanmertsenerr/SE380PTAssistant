@@ -206,7 +206,7 @@
   "chat_attachLabel": "Attach",
   "chat_importProgram": "Add to my programs",
   "chat_importingProgram": "Saving to programs…",
-  "chat_importProgramInstruction": "Save the program above ({title}) to my Programs using createProgram. Tool call only — no extra prose.",
+  "chat_importProgramInstruction": "Add the full program above ({title}) to my programs, with all its days and exercises, and tell me when it is saved.",
   "@chat_importProgramInstruction": {"placeholders": {"title": {"type": "String"}}},
   "notes_title": "Notes",
   "notes_search": "Search notes",
