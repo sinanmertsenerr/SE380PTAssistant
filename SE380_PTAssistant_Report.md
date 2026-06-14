@@ -13,7 +13,7 @@ _2025-2026 Spring Semester_
 
 Sinan Mert Sener - 20190602037  
 Instructor: Gazihan Alankus  
-Video: [PASTE YOUR YOUTUBE URL HERE]  
+Video: https://youtu.be/Fk_w2flr8GY  
 
 ---
 
@@ -96,7 +96,7 @@ The models are immutable and generated with freezed and json_serializable. The c
 
 This is a solo project. I, Sinan Mert Sener, designed and built all of it: the onboarding and authentication, the AI coach with its tools and guardrails, the program editor and the session runner, the home screen, the notes, the profile, the settings, the notifications, the Firebase setup and the security rules, and the English and Turkish localization.
 
-I used AI coding assistants while building it (see the External Factors section). I made the design decisions, chose the structure, and put the whole app together myself.
+I made the design decisions, chose the structure, and put the whole app together myself. I only used AI help in a couple of specific areas, which I explain in the External Factors section.
 
 
 ## 5. Improvements Since the Presentation
@@ -155,7 +155,7 @@ The Profile tab shows your photo, name and experience level, your metrics (heigh
 
 I want to be clear about the outside help and tools I used:
 
-- AI coding assistants: I used AI assistant tools (such as Claude) while writing, refactoring and debugging the code. I designed the app, made the decisions and assembled it myself, but AI helped me write parts of it.
+- AI coding assistants: I used an AI assistant (such as Claude) in two specific parts of the project: while integrating the AI coach feature into the app, and to get information on how to set up the Firebase integration.
 - Google Gemini through Firebase AI: the AI coach and the daily tip are powered by Google's Gemini model, and the source lookup tool uses Google Search grounding.
 - Firebase: Authentication, Cloud Firestore, Storage, Cloud Messaging and App Check are Google's backend services.
 - Open source packages from pub.dev: the main ones are flutter_riverpod, riverpod_annotation, go_router, the firebase packages (core, auth, cloud_firestore, storage, messaging, app_check), firebase_ai, flutter_local_notifications, timezone, freezed, json_serializable, image_picker, image_cropper, flutter_markdown, shared_preferences, intl, collection and rxdart.

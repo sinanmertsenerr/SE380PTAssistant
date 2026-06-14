@@ -13,7 +13,7 @@ class InactivityNudgeService {
 
   /// TEST SWITCH: set to true and the nudges fire 30/60/90 SECONDS from now
   /// instead of 3/5/7 days at 19:00. Set back to false before shipping.
-  static const testMode = true;
+  static const testMode = false;
 
   // Reserved id range; reminder notifications use Firestore-id hashes.
   static const _ids = [910001, 910002, 910003];

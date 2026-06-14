@@ -10,7 +10,7 @@ on the home screen. The backend is Firebase (Authentication, Cloud Firestore,
 Storage, Cloud Messaging and App Check) and the AI coach runs on Google Gemini
 through the Firebase AI package.
 
-Video: [PASTE YOUR YOUTUBE URL HERE]
+Video: https://youtu.be/Fk_w2flr8GY
 
 Flutter version used: Flutter 3.41.6 (stable channel), Dart 3.11.4
 
@@ -70,4 +70,4 @@ NOTES
   tests pass (flutter test).
 
 
-YouTube video URL: [PASTE YOUR YOUTUBE URL HERE]
+YouTube video URL: https://youtu.be/Fk_w2flr8GY
